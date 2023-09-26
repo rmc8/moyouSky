@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bluesky/bluesky.dart' as bsky;
 
 import 'package:moyousky/controllers/providers.dart';
+import 'package:moyousky/views/timeline.dart';
 
 class LoginScreen extends ConsumerWidget {
   LoginScreen({Key? key}) : super(key: key);
@@ -84,11 +85,10 @@ class LoginScreen extends ConsumerWidget {
                     await ref
                         .read(loginStateProvider.notifier)
                         .login(service, id, password);
-                    print("success");
-                    // Navigator.pushReplacement(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => const Timeline()),
-                    // );
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Timeline()),
+                    );
                   } catch (e) {
                     // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
