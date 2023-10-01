@@ -1,6 +1,13 @@
 import 'package:bluesky/bluesky.dart' as bsky;
 import 'package:moyousky/repository/shared_preferences_repository.dart';
 
+class TimelineResult {
+  final List<Map<String, dynamic>> feeds;
+  final String cursor;
+
+  TimelineResult({required this.feeds, required this.cursor});
+}
+
 class BlueskyApiService {
   final SharedPreferencesRepository _prefsRepository;
   bsky.Bluesky? _bluesky;
@@ -24,9 +31,10 @@ class BlueskyApiService {
     return _bluesky!;
   }
 
-  Future<List<Map<String, dynamic>>> getTimeline({int limit = 10}) async {
+  Future<TimelineResult> getTimeline({int limit = 32, String? cursor}) async {
     final blueskyInstance = await bluesky;
-    final pagination = blueskyInstance.feeds.paginateTimeline();
+    final pagination = blueskyInstance.feeds.paginateTimeline(cursor: cursor);
+    String nextCursor = "";
 
     final List<Map<String, dynamic>> allFeeds = [];
 
@@ -36,9 +44,10 @@ class BlueskyApiService {
 
       if (allFeeds.length > limit) {
         allFeeds.length = limit;
+        nextCursor = response.data.toJson()['cursor'];
       }
     }
 
-    return allFeeds;
+    return TimelineResult(feeds: allFeeds, cursor: nextCursor);
   }
 }

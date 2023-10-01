@@ -20,8 +20,9 @@ class LoginScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.blue,
+        title: const Center(
+            child: Text('Login', style: TextStyle(color: Colors.black87))),
+        backgroundColor: Colors.white,
       ),
       body: Center(
         child: Padding(

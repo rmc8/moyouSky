@@ -1,13 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bluesky/bluesky.dart' as bsky;
 import 'package:shared_preferences/shared_preferences.dart';
-
-// import 'package:moyousky/views/user_profile.dart';
 import 'package:moyousky/repository/shared_preferences_repository.dart';
-
-// final userProfileProvider =
-// StateNotifierProvider<UserProfileNotifier, UserProfileState>(
-//         (ref) => UserProfileNotifier(ref));
 
 final blueskySessionProvider = StreamProvider<bsky.Bluesky>((ref) async* {
   final sharedPreferencesRepository =
@@ -63,10 +57,9 @@ class LoginStateNotifier extends StateNotifier<bool> {
       await prefs.setString('service', service);
       await prefs.setString('id', id);
       await prefs.setString('password', password);
-
       state = true;
     } catch (e) {
-      throw Exception('Login failed.');
+      throw Exception('Login failed: $e.toString()');
     }
   }
 }

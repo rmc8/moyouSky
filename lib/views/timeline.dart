@@ -8,26 +8,103 @@ class Timeline extends StatefulWidget {
   const Timeline({Key? key}) : super(key: key);
 
   @override
-  _TimelineState createState() => _TimelineState();
+  TimelineState createState() => TimelineState();
 }
 
-class _TimelineState extends State<Timeline> {
+class TimelineState extends State<Timeline> {
   List<Post> posts = [];
+  bool isLoading = false;
+  bool showToTopButton = false;
   final prefsRepository = SharedPreferencesRepository();
   late final apiService = BlueskyApiService(prefsRepository);
+  String cursor = "";
+  String? nextCursor;
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    setState(() {
+      isLoading = true;
+    });
     _fetchPosts();
+    _scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  _scrollListener() {
+    if (_scrollController.offset > 300 && !showToTopButton) {
+      setState(() {
+        showToTopButton = true;
+      });
+    } else if (_scrollController.offset <= 300 && showToTopButton) {
+      setState(() {
+        showToTopButton = false;
+      });
+    }
+    if (_scrollController.offset <=
+            _scrollController.position.minScrollExtent &&
+        !_scrollController.position.outOfRange) {
+      setState(() {
+        isLoading = true;
+      });
+      _fetchNewPosts();
+    }
+    if (_scrollController.offset >=
+            _scrollController.position.maxScrollExtent &&
+        !_scrollController.position.outOfRange) {
+      setState(() {
+        isLoading = true;
+      });
+      _fetchPastPosts();
+    }
   }
 
   Future<void> _fetchPosts() async {
-    final feedViews = await apiService.getTimeline();
-    final List<Post> fetchedPosts = getPostWidgets(feedViews);
+    final feedViews = await apiService.getTimeline(limit: 32, cursor: cursor);
+    final List<Post> fetchedPosts = getPostWidgets(feedViews.feeds);
+    nextCursor = feedViews.cursor;
 
     setState(() {
       posts = fetchedPosts;
+      isLoading = false;
+    });
+  }
+
+  Future<void> _fetchPastPosts() async {
+    final feedViews =
+        await apiService.getTimeline(limit: 32, cursor: nextCursor);
+    final List<Post> fetchedPosts = getPostWidgets(feedViews.feeds);
+    nextCursor = feedViews.cursor;
+
+    setState(() {
+      posts.addAll(fetchedPosts);
+      isLoading = false;
+    });
+  }
+
+  Future<void> _fetchNewPosts() async {
+    final feedViews = await apiService.getTimeline(limit: 32, cursor: cursor);
+    final fetchedPosts = getPostWidgets(feedViews.feeds);
+    final List<Post> newPosts = [];
+
+    for (var post in fetchedPosts) {
+      if (!posts.contains(post)) {
+        newPosts.add(post);
+      } else {
+        break;
+      }
+    }
+
+    nextCursor = feedViews.cursor;
+    setState(() {
+      isLoading = false;
+      posts = newPosts;
     });
   }
 
@@ -52,21 +129,58 @@ class _TimelineState extends State<Timeline> {
           actions: <Widget>[
             IconButton(
                 icon: const Icon(
-                  Icons.lightbulb,
-                  color: Colors.black54,
-                ),
-                onPressed: () {}),
-            IconButton(
-                icon: const Icon(
                   Icons.settings,
                   color: Colors.black54,
                 ),
                 onPressed: () {}),
           ],
         ),
-        body: ListView.builder(
-          itemCount: posts.length,
-          itemBuilder: (context, index) => posts[index],
+        body: Stack(
+          children: [
+            ListView.builder(
+              controller: _scrollController,
+              itemCount: posts.length,
+              itemBuilder: (context, index) => posts[index],
+            ),
+            if (isLoading)
+              const Center(
+                child: SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    backgroundColor: Colors.black87,
+                  ),
+                ),
+              ),
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: FloatingActionButton(
+                onPressed: () {
+                  // change post view
+                },
+                child: const Icon(Icons.add),
+              ),
+            ),
+            if (showToTopButton)
+              Positioned(
+                bottom: 24,
+                left: 16,
+                width: 40,
+                height: 40,
+                child: FloatingActionButton(
+                  mini: true,
+                  onPressed: () {
+                    _scrollController.animateTo(0,
+                        duration: const Duration(seconds: 1),
+                        curve: Curves.easeInOut);
+                  },
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black87,
+                  child: const Icon(Icons.keyboard_arrow_up_rounded),
+                ),
+              ),
+          ],
         ),
         bottomNavigationBar: BottomNavigationBar(
           selectedItemColor: Colors.black54,
@@ -97,11 +211,11 @@ class _TimelineState extends State<Timeline> {
               label: "Notification",
               backgroundColor: Colors.white,
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person, color: Colors.black54),
-              label: "Profile",
-              backgroundColor: Colors.white,
-            ),
+            // BottomNavigationBarItem(
+            //   icon: Icon(Icons.person, color: Colors.black54),
+            //   label: "Profile",
+            //   backgroundColor: Colors.white,
+            // ),
           ],
         ));
   }
