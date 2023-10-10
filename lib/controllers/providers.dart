@@ -1,14 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bluesky/bluesky.dart' as bsky;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:moyousky/repository/shared_preferences_repository.dart';
+import 'package:moyousky/utils/database_helper.dart';
 
 final blueskySessionProvider = StreamProvider<bsky.Bluesky>((ref) async* {
   final sharedPreferencesRepository =
       ref.read(sharedPreferencesRepositoryProvider);
   final service = await sharedPreferencesRepository.getService();
   final id = await sharedPreferencesRepository.getId();
-  final password = await sharedPreferencesRepository.getPassword();
+
+  final loginInfo =
+      await DatabaseHelper.instance.getLoginInfoByServiceAndId(service, id);
+  final password = loginInfo['password'];
 
   while (true) {
     final session = await bsky.createSession(
@@ -36,14 +39,8 @@ class LoginStateNotifier extends StateNotifier<bool> {
   final StateNotifierProviderRef<LoginStateNotifier, bool> ref;
 
   Future<void> checkLoginStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (prefs.containsKey('service') &&
-        prefs.containsKey('id') &&
-        prefs.containsKey('password')) {
-      state = true;
-    } else {
-      state = false;
-    }
+    final loginInfo = await DatabaseHelper.instance.getLoginInfo();
+    state = loginInfo.isNotEmpty;
   }
 
   Future<void> login(String service, String id, String password) async {
@@ -53,10 +50,17 @@ class LoginStateNotifier extends StateNotifier<bool> {
         identifier: id,
         password: password,
       );
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('service', service);
-      await prefs.setString('id', id);
-      await prefs.setString('password', password);
+      await DatabaseHelper.instance.insertLoginInfo({
+        'service': service,
+        'id': id,
+        'password': password,
+      });
+
+      final sharedPreferencesRepository =
+          ref.read(sharedPreferencesRepositoryProvider);
+      await sharedPreferencesRepository.setService(service);
+      await sharedPreferencesRepository.setId(id);
+
       state = true;
     } catch (e) {
       throw Exception('Login failed: $e.toString()');

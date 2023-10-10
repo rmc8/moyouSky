@@ -23,7 +23,10 @@ dependencies:
   url_launcher:
   flutter_svg:
   pointycastle: ^3.3.3
-  path_provider:
+  sqflite: ^2.0.0+3
+  path_provider: ^2.0.2
+  sqflite_sqlcipher:
+  flutter_secure_storage:
 
 dev_dependencies:
   flutter_test:
@@ -33,7 +36,6 @@ dev_dependencies:
   flutter_gen_runner:
   json_serializable: ^6.3.1
   flutter_launcher_icons: ^0.9.0
-
 
 flutter:
   generate: true

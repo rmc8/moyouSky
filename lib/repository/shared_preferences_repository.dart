@@ -30,11 +30,11 @@ class SharedPreferencesRepository {
     (await sharedPreferences).setString('id', id);
   }
 
-  Future<String> getPassword() async {
-    return (await sharedPreferences).getString('password') ?? '';
-  }
-
-  Future<void> setPassword(String password) async {
-    (await sharedPreferences).setString('password', password);
-  }
+  // Future<String> getPassword() async {
+  //   return (await sharedPreferences).getString('password') ?? '';
+  // }
+  //
+  // Future<void> setPassword(String password) async {
+  //   (await sharedPreferences).setString('password', password);
+  // }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:moyousky/widgets/post.dart';
 import 'package:moyousky/services/bluesky_api_service.dart';
-import 'package:moyousky/repository/shared_preferences_repository.dart';
+import 'package:moyousky/utils/database_helper.dart';
 import 'package:moyousky/utils/post_utils.dart';
+import 'package:moyousky/widgets/main_drawer.dart';
 
 class Timeline extends StatefulWidget {
   const Timeline({Key? key}) : super(key: key);
@@ -15,8 +16,9 @@ class TimelineState extends State<Timeline> {
   List<Post> posts = [];
   bool isLoading = false;
   bool showToTopButton = false;
-  final prefsRepository = SharedPreferencesRepository();
-  late final apiService = BlueskyApiService(prefsRepository);
+
+  // final prefsRepository = SharedPreferencesRepository();
+  late final apiService = BlueskyApiService(DatabaseHelper.instance);
   String cursor = "";
   String? nextCursor;
   final _scrollController = ScrollController();
@@ -111,112 +113,117 @@ class TimelineState extends State<Timeline> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          leading: const Icon(Icons.menu, color: Colors.black54),
-          title: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.cloud, color: Color.fromARGB(255, 74, 74, 74)),
-              Padding(
-                padding: EdgeInsets.only(left: 5.0),
-                child:
-                    Text('moyouSky', style: TextStyle(color: Colors.black87)),
-              ),
-            ],
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          actions: <Widget>[
-            IconButton(
-                icon: const Icon(
-                  Icons.settings,
-                  color: Colors.black54,
-                ),
-                onPressed: () {}),
-          ],
+      appBar: AppBar(
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: const Icon(Icons.menu, color: Colors.black54),
+              onPressed: () {
+                Scaffold.of(context).openDrawer(); // ドロワーを開く
+              },
+            );
+          },
         ),
-        body: Stack(
+        title: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ListView.builder(
-              controller: _scrollController,
-              itemCount: posts.length,
-              itemBuilder: (context, index) => posts[index],
+            Icon(Icons.cloud, color: Color.fromARGB(255, 74, 74, 74)),
+            Padding(
+              padding: EdgeInsets.only(left: 5.0),
+              child: Text('moyouSky', style: TextStyle(color: Colors.black87)),
             ),
-            if (isLoading)
-              const Center(
-                child: SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(
-                    backgroundColor: Colors.black87,
-                  ),
-                ),
-              ),
-            Positioned(
-              bottom: 16,
-              right: 16,
-              child: FloatingActionButton(
-                onPressed: () {
-                  // change post view
-                },
-                child: const Icon(Icons.add),
-              ),
-            ),
-            if (showToTopButton)
-              Positioned(
-                bottom: 24,
-                left: 16,
-                width: 40,
-                height: 40,
-                child: FloatingActionButton(
-                  mini: true,
-                  onPressed: () {
-                    _scrollController.animateTo(0,
-                        duration: const Duration(seconds: 1),
-                        curve: Curves.easeInOut);
-                  },
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black87,
-                  child: const Icon(Icons.keyboard_arrow_up_rounded),
-                ),
-              ),
           ],
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          selectedItemColor: Colors.black54,
-          unselectedItemColor: Colors.black54,
-          selectedFontSize: 10.5,
-          unselectedFontSize: 10.5,
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home_filled,
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        actions: <Widget>[
+          IconButton(
+              icon: const Icon(
+                Icons.settings,
                 color: Colors.black54,
               ),
-              label: "Home",
-              backgroundColor: Colors.white,
+              onPressed: () {}),
+        ],
+      ),
+      drawer: const MainDrawer(),
+      body: Stack(
+        children: [
+          ListView.builder(
+            controller: _scrollController,
+            itemCount: posts.length,
+            itemBuilder: (context, index) => posts[index],
+          ),
+          if (isLoading)
+            const Center(
+              child: SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  backgroundColor: Colors.black87,
+                ),
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search_rounded, color: Colors.black54),
-              label: "Search",
-              backgroundColor: Colors.white,
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton(
+              onPressed: () {
+                // change post view
+              },
+              child: const Icon(Icons.add),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.rss_feed_rounded, color: Colors.black54),
-              label: "Feed",
-              backgroundColor: Colors.white,
+          ),
+          if (showToTopButton)
+            Positioned(
+              bottom: 24,
+              left: 16,
+              width: 40,
+              height: 40,
+              child: FloatingActionButton(
+                mini: true,
+                onPressed: () {
+                  _scrollController.animateTo(0,
+                      duration: const Duration(seconds: 1),
+                      curve: Curves.easeInOut);
+                },
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black87,
+                child: const Icon(Icons.keyboard_arrow_up_rounded),
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications, color: Colors.black54),
-              label: "Notification",
-              backgroundColor: Colors.white,
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        selectedItemColor: Colors.black54,
+        unselectedItemColor: Colors.black54,
+        selectedFontSize: 10.5,
+        unselectedFontSize: 10.5,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.home_filled,
+              color: Colors.black54,
             ),
-            // BottomNavigationBarItem(
-            //   icon: Icon(Icons.person, color: Colors.black54),
-            //   label: "Profile",
-            //   backgroundColor: Colors.white,
-            // ),
-          ],
-        ));
+            label: "Home",
+            backgroundColor: Colors.white,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search_rounded, color: Colors.black54),
+            label: "Search",
+            backgroundColor: Colors.white,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.rss_feed_rounded, color: Colors.black54),
+            label: "Feed",
+            backgroundColor: Colors.white,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications, color: Colors.black54),
+            label: "Notification",
+            backgroundColor: Colors.white,
+          ),
+        ],
+      ),
+    );
   }
 }

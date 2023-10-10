@@ -49,20 +49,20 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.moyousky"
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
 
-    signingConfigs {
-        release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
-        }
-    }
+//    signingConfigs {
+//        release {
+//            keyAlias keystoreProperties['keyAlias']
+//            keyPassword keystoreProperties['keyPassword']
+//            storeFile file(keystoreProperties['storeFile'])
+//            storePassword keystoreProperties['storePassword']
+//        }
+//    }
 
     buildTypes {
         debug {
@@ -70,10 +70,10 @@ android {
             applicationIdSuffix ".debug"
             versionNameSuffix "-d"
         }
-        release {
-            resValue "string", "app_name", "moyouSky"
-            signingConfig signingConfigs.release
-        }
+//        release {
+//            resValue "string", "app_name", "moyouSky"
+//            signingConfig signingConfigs.release
+//        }
     }
 }
 

@@ -1,5 +1,5 @@
 import 'package:bluesky/bluesky.dart' as bsky;
-import 'package:moyousky/repository/shared_preferences_repository.dart';
+import 'package:moyousky/utils/database_helper.dart';
 
 class TimelineResult {
   final List<Map<String, dynamic>> feeds;
@@ -9,17 +9,22 @@ class TimelineResult {
 }
 
 class BlueskyApiService {
-  final SharedPreferencesRepository _prefsRepository;
+  final DatabaseHelper _databaseHelper;
   bsky.Bluesky? _bluesky;
 
-  BlueskyApiService(this._prefsRepository);
+  BlueskyApiService(this._databaseHelper);
 
   Future<bsky.Bluesky> get bluesky async {
     if (_bluesky != null) return _bluesky!;
 
-    final service = await _prefsRepository.getService();
-    final id = await _prefsRepository.getId();
-    final password = await _prefsRepository.getPassword();
+    final loginInfo = await _databaseHelper.getLoginInfo();
+    if (loginInfo.isEmpty) {
+      throw Exception('Login information not found.');
+    }
+
+    final service = loginInfo[0]['service'];
+    final id = loginInfo[0]['id'];
+    final password = loginInfo[0]['password'];
 
     final session = await bsky.createSession(
       service: service,
