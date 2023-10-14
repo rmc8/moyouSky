@@ -5,6 +5,7 @@ import 'package:bluesky/bluesky.dart' as bsky;
 
 import 'package:moyousky/controllers/providers.dart';
 import 'package:moyousky/views/timeline.dart';
+import 'package:moyousky/widgets/headerLogo.dart' as hl;
 
 class LoginScreen extends ConsumerWidget {
   LoginScreen({Key? key}) : super(key: key);
@@ -20,9 +21,22 @@ class LoginScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-            child: Text('Login', style: TextStyle(color: Colors.black87))),
+        title: hl.HeaderLogo(title: 'Login'),
         backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black54),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        actions: <Widget>[
+          IconButton(
+              icon: const Icon(
+                Icons.settings,
+                color: Colors.white,
+              ),
+              onPressed: () {}),
+        ],
       ),
       body: Center(
         child: Padding(

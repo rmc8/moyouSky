@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bluesky/bluesky.dart' as bsky;
 import 'package:moyousky/repository/shared_preferences_repository.dart';
 import 'package:moyousky/utils/database_helper.dart';
+import 'package:moyousky/utils/database_helper.dart' as dh;
+import 'package:moyousky/services/bluesky_api_service.dart' as skys;
 
 final blueskySessionProvider = StreamProvider<bsky.Bluesky>((ref) async* {
   final sharedPreferencesRepository =
@@ -44,25 +46,44 @@ class LoginStateNotifier extends StateNotifier<bool> {
   }
 
   Future<void> login(String service, String id, String password) async {
+    final sharedPreferencesRepository =
+    ref.read(sharedPreferencesRepositoryProvider);
     try {
-      await bsky.createSession(
+      final res = await bsky.createSession(
         service: service,
         identifier: id,
         password: password,
       );
-      await DatabaseHelper.instance.insertLoginInfo({
+      final Map<String, dynamic> loginDataToInsert = {
         'service': service,
         'id': id,
         'password': password,
-      });
-
-      final sharedPreferencesRepository =
-          ref.read(sharedPreferencesRepositoryProvider);
+        'email': res.data.email,
+        'handle': res.data.handle,
+        'display_name': '',
+        'avatar_url': '',
+        'followers_count': 0,
+        'follows_count': 0,
+        'description': '',
+      };
+      await DatabaseHelper.instance.insertLoginInfo(loginDataToInsert);
+      final dbHelper = dh.DatabaseHelper.instance;
+      final prf = skys.BlueskyApiService(dbHelper);
       await sharedPreferencesRepository.setService(service);
-      await sharedPreferencesRepository.setId(id);
-
+      await sharedPreferencesRepository.setId(res.data.handle.toString());
+      final profileData = await prf.fetchProfileData(res.data.handle);
+      final Map<String, dynamic> userDataToInsert = {
+        'display_name': profileData['displayName'],
+        'avatar_url': profileData['avatar'],
+        'followers_count': profileData['followersCount'],
+        'follows_count': profileData['followsCount'],
+        'description': profileData['description'],
+      };
+      await DatabaseHelper.instance.updateLoginInfoByHandleAndService(res.data.handle, service, userDataToInsert);
       state = true;
     } catch (e) {
+      await sharedPreferencesRepository.setService('');
+      await sharedPreferencesRepository.setId('');
       throw Exception('Login failed: $e.toString()');
     }
   }

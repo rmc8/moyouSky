@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:moyousky/widgets/post.dart';
+import 'package:moyousky/widgets/post/post.dart';
 import 'package:moyousky/services/bluesky_api_service.dart';
 import 'package:moyousky/utils/database_helper.dart';
 import 'package:moyousky/utils/post_utils.dart';
 import 'package:moyousky/widgets/main_drawer.dart';
+import 'package:moyousky/widgets/headerLogo.dart' as hl;
 
 class Timeline extends StatefulWidget {
   const Timeline({Key? key}) : super(key: key);
@@ -124,16 +125,7 @@ class TimelineState extends State<Timeline> {
             );
           },
         ),
-        title: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.cloud, color: Color.fromARGB(255, 74, 74, 74)),
-            Padding(
-              padding: EdgeInsets.only(left: 5.0),
-              child: Text('moyouSky', style: TextStyle(color: Colors.black87)),
-            ),
-          ],
-        ),
+        title: hl.HeaderLogo(),
         centerTitle: true,
         backgroundColor: Colors.white,
         actions: <Widget>[

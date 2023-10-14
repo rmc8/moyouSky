@@ -28,7 +28,17 @@ void main() async {
     ProviderScope(
       child: MaterialApp(
         title: 'moyouSky',
-        theme: ThemeData.light(),
+        theme: ThemeData(
+            textTheme: TextTheme(
+          bodyText1: const TextStyle(fontFamily: 'NotoSunsJP'),
+          bodyText2: const TextStyle(fontFamily: 'NotoSunsJP'),
+          headline1: const TextStyle(fontFamily: 'NotoSunsJP'),
+          headline2: const TextStyle(fontFamily: 'NotoSunsJP'),
+          headline3: const TextStyle(fontFamily: 'NotoSunsJP'),
+          headline4: const TextStyle(fontFamily: 'NotoSunsJP'),
+          headline5: const TextStyle(fontFamily: 'NotoSunsJP'),
+          headline6: const TextStyle(fontFamily: 'NotoSunsJP'),
+        )),
         darkTheme: ThemeData.dark(),
         themeMode: mode,
         home: isLoggedIn ? const Timeline() : LoginScreen(),

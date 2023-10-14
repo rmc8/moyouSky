@@ -11,14 +11,21 @@ class DatabaseHelper {
   static const columnService = 'service';
   static const columnId = 'id';
   static const columnPassword = 'password';
-  static const columnAccountId = 'accountId';
+  static const columnEmail = 'email';
+  static const columnHandle = 'handle';
+  static const columnDisplayName = 'display_name';
+  static const columnAvatarUrl = 'avatar_url';
+  static const columnDescription = 'description';
+  static const columnFollowersCount = 'followers_count';
+  static const columnFollowsCount = 'follows_count';
 
   static final DatabaseHelper _instance = DatabaseHelper._privateConstructor();
+
   static DatabaseHelper get instance => _instance;
 
   Database? _database;
-  final secureStorage = FlutterSecureStorage();
-  final _keyLifeDuration = Duration(days: 180);  // For example, set to 180 days
+  final secureStorage = const FlutterSecureStorage();
+  final _keyLifeDuration = const Duration(days: 180);
 
   DatabaseHelper._privateConstructor();
 
@@ -44,10 +51,16 @@ class DatabaseHelper {
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
           CREATE TABLE $table (
-            $columnAccountId INTEGER PRIMARY KEY,
+            $columnId TEXT PRIMARY KEY,
             $columnService TEXT NOT NULL,
-            $columnId TEXT NOT NULL,
-            $columnPassword TEXT NOT NULL
+            $columnPassword TEXT NOT NULL,
+            $columnEmail TEXT,
+            $columnHandle TEXT,
+            $columnDisplayName TEXT, 
+            $columnAvatarUrl TEXT,
+            $columnDescription TEXT,
+            $columnFollowersCount INTEGER,
+            $columnFollowsCount INTEGER
           )
           ''');
   }
@@ -63,9 +76,11 @@ class DatabaseHelper {
       }
     }
 
-    final newPassword = base64Url.encode(List<int>.generate(24, (i) => (33 + i) % 94));
+    final newPassword =
+        base64Url.encode(List<int>.generate(24, (i) => (33 + i) % 94));
     await secureStorage.write(key: 'db_password', value: newPassword);
-    await secureStorage.write(key: 'db_key_date', value: DateTime.now().toIso8601String());
+    await secureStorage.write(
+        key: 'db_key_date', value: DateTime.now().toIso8601String());
 
     if (storedPassword != null) {
       var databasesPath = await getDatabasesPath();
@@ -89,7 +104,6 @@ class DatabaseHelper {
     await db.insert(table, loginInfo);
   }
 
-
   Future<List<Map<String, dynamic>>> getLoginInfo() async {
     final db = await database;
     return await db.query(table);
@@ -105,7 +119,6 @@ class DatabaseHelper {
     );
   }
 
-
   Future<void> deleteLoginInfo(String id) async {
     final db = await database;
     await db.delete(
@@ -115,7 +128,8 @@ class DatabaseHelper {
     );
   }
 
-  Future<Map<String, dynamic>> getLoginInfoByServiceAndId(String service, String id) async {
+  Future<Map<String, dynamic>> getLoginInfoByServiceAndId(
+      String service, String id) async {
     final db = await database;
     final result = await db.query(
       table,
@@ -126,5 +140,15 @@ class DatabaseHelper {
       return result.first;
     }
     return {};
+  }
+
+  Future<void> updateLoginInfoByHandleAndService(String handle, String service, Map<String, dynamic> loginInfo) async {
+    final db = await database;
+    await db.update(
+      table,
+      loginInfo,
+      where: '$columnHandle = ? AND $columnService = ?',
+      whereArgs: [handle, service],
+    );
   }
 }

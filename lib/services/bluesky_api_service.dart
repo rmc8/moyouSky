@@ -1,5 +1,13 @@
 import 'package:bluesky/bluesky.dart' as bsky;
 import 'package:moyousky/utils/database_helper.dart';
+import 'package:moyousky/repository/shared_preferences_repository.dart';
+
+class BlueskySessionResult {
+  final bsky.Session? session;
+  final bsky.Bluesky bluesky;
+
+  BlueskySessionResult({this.session, required this.bluesky});
+}
 
 class TimelineResult {
   final List<Map<String, dynamic>> feeds;
@@ -14,30 +22,38 @@ class BlueskyApiService {
 
   BlueskyApiService(this._databaseHelper);
 
-  Future<bsky.Bluesky> get bluesky async {
-    if (_bluesky != null) return _bluesky!;
+  Future<BlueskySessionResult> getBlueskySession() async {
+    if (_bluesky != null)
+      return BlueskySessionResult(session: null, bluesky: _bluesky!);
 
-    final loginInfo = await _databaseHelper.getLoginInfo();
-    if (loginInfo.isEmpty) {
-      throw Exception('Login information not found.');
+    // SharedPreferencesからIDを取得
+    final spr = SharedPreferencesRepository();
+    final currentUserId = await spr.getId();
+    final currentService = await spr.getService();
+    if (currentUserId.isEmpty) {
+      throw Exception('User ID not found in shared preferences.');
     }
 
-    final service = loginInfo[0]['service'];
-    final id = loginInfo[0]['id'];
-    final password = loginInfo[0]['password'];
+    final loginInfo = await _databaseHelper.getLoginInfoByServiceAndId(currentService, currentUserId);
+    if (loginInfo.isEmpty) {
+      throw Exception('Login information not found for user ID: $currentUserId.');
+    }
+    final service = loginInfo['service'];
+    final id = loginInfo['handle'];
+    final password = loginInfo['password'];
 
-    final session = await bsky.createSession(
+    final response = await bsky.createSession(
       service: service,
       identifier: id,
       password: password,
     );
-
-    _bluesky = bsky.Bluesky.fromSession(session.data, service: service);
-    return _bluesky!;
+    _bluesky = bsky.Bluesky.fromSession(response.data, service: service);
+    return BlueskySessionResult(session: response.data, bluesky: _bluesky!);
   }
 
+
   Future<TimelineResult> getTimeline({int limit = 32, String? cursor}) async {
-    final blueskyInstance = await bluesky;
+    final blueskyInstance = (await getBlueskySession()).bluesky;
     final pagination = blueskyInstance.feeds.paginateTimeline(cursor: cursor);
     String nextCursor = "";
 
@@ -54,5 +70,11 @@ class BlueskyApiService {
     }
 
     return TimelineResult(feeds: allFeeds, cursor: nextCursor);
+  }
+
+  Future<Map<String, dynamic>> fetchProfileData(String actor) async {
+    final blueskyInstance = (await getBlueskySession()).bluesky;
+    final profile = await blueskyInstance.actors.findProfile(actor: actor);
+    return profile.data.toJson();
   }
 }

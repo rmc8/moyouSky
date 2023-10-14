@@ -1,4 +1,4 @@
-import 'package:moyousky/widgets/post.dart';
+import 'package:moyousky/widgets/post/post.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 List<Post> getPostWidgets(List<Map<String, dynamic>> feedViews) {

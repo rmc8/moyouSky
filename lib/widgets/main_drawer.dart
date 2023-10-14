@@ -1,11 +1,136 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:moyousky/views/switch_account.dart' as sa;
 import 'package:moyousky/utils/database_helper.dart' as dh;
 import 'package:moyousky/repository/shared_preferences_repository.dart' as spr;
-import 'package:moyousky/views/login.dart' as li;
-import 'package:url_launcher/url_launcher.dart';
 
-class MainDrawer extends StatelessWidget {
+class MainDrawer extends StatefulWidget {
   const MainDrawer({super.key});
+
+  @override
+  MainDrawerState createState() => MainDrawerState();
+}
+
+class MainDrawerState extends State<MainDrawer> {
+  Map<String, dynamic> profileData = {};
+
+  @override
+  Widget build(BuildContext context) {
+    final dbHelper = dh.DatabaseHelper.instance;
+    final sprObj = spr.SharedPreferencesRepository();
+
+    return Drawer(
+      child: FutureBuilder<String>(
+        future: sprObj.getId(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final uid = snapshot.data!;
+          return FutureBuilder<String>(
+            future: sprObj.getService(),
+            builder: (context, serviceSnapshot) {
+              if (!serviceSnapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final serviceName = serviceSnapshot.data!;
+              return FutureBuilder<Map<String, dynamic>>(
+                future: dbHelper.getLoginInfoByServiceAndId(serviceName, uid),
+                builder: (context, localProfileSnapshot) {
+                  if (!localProfileSnapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  profileData = localProfileSnapshot.data!;
+
+                  final imageUrl = profileData['avatar_url'] ?? "";
+                  final name = profileData['display_name'] ?? "";
+                  final userId = profileData['handle'] ?? "";
+                  final followsCount = profileData['follows_count'] ?? 0;
+                  final followersCount = profileData['followers_count'] ?? 0;
+
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            ProfileSection(
+                              imageUrl: imageUrl,
+                              name: name,
+                              userId: userId,
+                              followers: followersCount,
+                              following: followsCount,
+                            ),
+                            const DrawerMenuItem(
+                              title: 'プロフィール',
+                              iconData: Icons.account_circle_rounded,
+                            ),
+                            const SwitchAccountList(),
+                            const DrawerMenuItem(
+                              title: '招待コード',
+                              iconData: Icons.code_rounded,
+                            ),
+                            const DrawerMenuItem(
+                              title: '設定',
+                              iconData: Icons.settings,
+                            ),
+                            const DrawerMenuItem(
+                              title: 'ヘルプ',
+                              iconData: Icons.help_center,
+                              onTapFunction: _launchHelpURL,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 10,
+                              child: Container(
+                                margin: const EdgeInsets.all(4.0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(32.0),
+                                  border: Border.all(color: Colors.redAccent),
+                                ),
+                                child: const Align(
+                                  widthFactor: 0.6,
+                                  alignment: Alignment.center,
+                                  child: LogoutButton(),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 7,
+                              child: Container(
+                                margin: const EdgeInsets.all(4.0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(32.0),
+                                  color:
+                                      const Color.fromARGB(255, 230, 236, 255),
+                                ),
+                                child: const Align(
+                                  alignment: Alignment.center,
+                                  child: FeedbackButton(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
 
   static void _launchHelpURL() async {
     const url = 'https://blueskyweb.zendesk.com/';
@@ -14,84 +139,6 @@ class MainDrawer extends StatelessWidget {
     } else {
       throw 'Could not launch $url';
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-      child: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              children: const [
-                ProfileSection(
-                  imageUrl:
-                      "https://cdn.bsky.app/img/avatar/plain/did:plc:4o3jsrb3r5ernif33bqugmee/bafkreihsognm3ghwsh2vjccoeer2evnpiklulynx35phhereyw2twwaxue@jpeg",
-                  name: "K☕",
-                  userId: "@k.rmc-8.com",
-                  followers: 28,
-                  following: 21,
-                ),
-                DrawerMenuItem(
-                  title: 'プロフィール',
-                  iconData: Icons.account_circle_rounded,
-                ),
-                SwitchAccountList(),
-                DrawerMenuItem(
-                  title: '招待',
-                  iconData: Icons.code_rounded,
-                ),
-                DrawerMenuItem(
-                  title: '設定',
-                  iconData: Icons.settings,
-                ),
-                DrawerMenuItem(
-                  title: 'ヘルプ',
-                  iconData: Icons.help_center,
-                  onTapFunction: _launchHelpURL,
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 10,
-                  child: Container(
-                    margin: const EdgeInsets.all(4.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(32.0),
-                      border: Border.all(color: Colors.redAccent),
-                    ),
-                    child: const Align(
-                      widthFactor: 0.6,
-                      alignment: Alignment.center,
-                      child: LogoutButton(),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 7,
-                  child: Container(
-                    margin: const EdgeInsets.all(4.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(32.0),
-                      color: const Color.fromARGB(255, 230, 236, 255),
-                    ),
-                    child: const Align(
-                      alignment: Alignment.center,
-                      child: FeedbackButton(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
   }
 }
 
@@ -167,7 +214,11 @@ class SwitchAccountList extends StatelessWidget {
     return ListTile(
       leading: const Icon(Icons.switch_account),
       title: const Text('アカウント切り替え'),
-      onTap: () {},
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) => sa.SwitchAccountScreen(),
+        ));
+      },
     );
   }
 }
@@ -205,7 +256,7 @@ class LogoutButton extends StatelessWidget {
     await sprObj.setService('');
 
     Navigator.of(context).pushReplacement(MaterialPageRoute(
-      builder: (BuildContext context) => li.LoginScreen(),
+      builder: (BuildContext context) => sa.SwitchAccountScreen(),
     ));
   }
 
