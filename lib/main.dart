@@ -6,6 +6,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'package:moyousky/themes/app_text_theme.dart';
 import 'package:moyousky/views/login.dart';
 import 'package:moyousky/views/timeline.dart';
 import 'package:moyousky/themes/statusBar.dart';
@@ -29,16 +30,7 @@ void main() async {
       child: MaterialApp(
         title: 'moyouSky',
         theme: ThemeData(
-            textTheme: TextTheme(
-          bodyText1: const TextStyle(fontFamily: 'NotoSunsJP'),
-          bodyText2: const TextStyle(fontFamily: 'NotoSunsJP'),
-          headline1: const TextStyle(fontFamily: 'NotoSunsJP'),
-          headline2: const TextStyle(fontFamily: 'NotoSunsJP'),
-          headline3: const TextStyle(fontFamily: 'NotoSunsJP'),
-          headline4: const TextStyle(fontFamily: 'NotoSunsJP'),
-          headline5: const TextStyle(fontFamily: 'NotoSunsJP'),
-          headline6: const TextStyle(fontFamily: 'NotoSunsJP'),
-        )),
+            textTheme: appTextTheme),
         darkTheme: ThemeData.dark(),
         themeMode: mode,
         home: isLoggedIn ? const Timeline() : LoginScreen(),

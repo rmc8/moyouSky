@@ -60,17 +60,19 @@ class LoginStateNotifier extends StateNotifier<bool> {
         'password': password,
         'email': res.data.email,
         'handle': res.data.handle,
+        'did': res.data.did,
         'display_name': '',
         'avatar_url': '',
         'followers_count': 0,
         'follows_count': 0,
         'description': '',
       };
+      print(res.data);
       await DatabaseHelper.instance.insertLoginInfo(loginDataToInsert);
-      final dbHelper = dh.DatabaseHelper.instance;
-      final prf = skys.BlueskyApiService(dbHelper);
+      final prf = skys.BlueskyApiService();
       await sharedPreferencesRepository.setService(service);
       await sharedPreferencesRepository.setId(res.data.handle.toString());
+      await sharedPreferencesRepository.setDid(res.data.did.toString());
       final profileData = await prf.fetchProfileData(res.data.handle);
       final Map<String, dynamic> userDataToInsert = {
         'display_name': profileData['displayName'],

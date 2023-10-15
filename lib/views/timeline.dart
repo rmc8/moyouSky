@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:moyousky/widgets/post/post.dart';
 import 'package:moyousky/services/bluesky_api_service.dart';
-import 'package:moyousky/utils/database_helper.dart';
 import 'package:moyousky/utils/post_utils.dart';
-import 'package:moyousky/widgets/main_drawer.dart';
-import 'package:moyousky/widgets/headerLogo.dart' as hl;
+import 'package:moyousky/widgets/drawer/main_drawer.dart';
+import 'package:moyousky/widgets/common/headerLogo.dart' as hl;
+import 'package:moyousky/views/search.dart';
+import 'package:moyousky/animation/fade_route.dart';
+import 'package:moyousky/widgets/drawer_button/main_drawer_btn.dart';
+import 'package:moyousky/widgets/navigation/bottom_navi.dart';
 
 class Timeline extends StatefulWidget {
   const Timeline({Key? key}) : super(key: key);
@@ -19,7 +22,7 @@ class TimelineState extends State<Timeline> {
   bool showToTopButton = false;
 
   // final prefsRepository = SharedPreferencesRepository();
-  late final apiService = BlueskyApiService(DatabaseHelper.instance);
+  late final apiService = BlueskyApiService();
   String cursor = "";
   String? nextCursor;
   final _scrollController = ScrollController();
@@ -118,9 +121,9 @@ class TimelineState extends State<Timeline> {
         leading: Builder(
           builder: (context) {
             return IconButton(
-              icon: const Icon(Icons.menu, color: Colors.black54),
+              icon: UserAvatar(),
               onPressed: () {
-                Scaffold.of(context).openDrawer(); // ドロワーを開く
+                Scaffold.of(context).openDrawer();
               },
             );
           },
@@ -185,36 +188,13 @@ class TimelineState extends State<Timeline> {
             ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.black54,
-        unselectedItemColor: Colors.black54,
-        selectedFontSize: 10.5,
-        unselectedFontSize: 10.5,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home_filled,
-              color: Colors.black54,
-            ),
-            label: "Home",
-            backgroundColor: Colors.white,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search_rounded, color: Colors.black54),
-            label: "Search",
-            backgroundColor: Colors.white,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.rss_feed_rounded, color: Colors.black54),
-            label: "Feed",
-            backgroundColor: Colors.white,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications, color: Colors.black54),
-            label: "Notification",
-            backgroundColor: Colors.white,
-          ),
-        ],
+      bottomNavigationBar: BskyBottomNavigationBar(
+        onTap: (index) {
+          if (index == 1) {
+            Navigator.of(context).push(FadeRoute(page: SearchScreen()));
+          }
+          // 他のindexの処理を追加することができます
+        },
       ),
     );
   }

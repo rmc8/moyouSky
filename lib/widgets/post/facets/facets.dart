@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:moyousky/widgets/post/facets/richtext.dart';
 import 'package:moyousky/utils/constants.dart' as c;
 
-class PostWithLinks extends StatelessWidget {
+class FacetsProcessing extends StatelessWidget {
   final Map<String, dynamic> postData;
 
-  const PostWithLinks({Key? key, required this.postData}) : super(key: key);
+  const FacetsProcessing({Key? key, required this.postData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,7 @@ class PostWithLinks extends StatelessWidget {
               text: facetText, uri: feature['uri'], fontSize: c.FONT_SIZE));
         } else if (feature['\$type'] == 'app.bsky.richtext.facet#tag') {
           spans.add(RichTextHelper.hashtagTextSpan(
-              text: facetText, fontSize: c.FONT_SIZE));
+              text: facetText, fontSize: c.FONT_SIZE, context: context));
         }
 
         lastFacetEndByte = byteEnd;

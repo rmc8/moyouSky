@@ -10,6 +10,7 @@ class DatabaseHelper {
   static const table = 'login';
   static const columnService = 'service';
   static const columnId = 'id';
+  static const columnDid = 'did';
   static const columnPassword = 'password';
   static const columnEmail = 'email';
   static const columnHandle = 'handle';
@@ -52,6 +53,7 @@ class DatabaseHelper {
     await db.execute('''
           CREATE TABLE $table (
             $columnId TEXT PRIMARY KEY,
+            $columnDid TEXT,
             $columnService TEXT NOT NULL,
             $columnPassword TEXT NOT NULL,
             $columnEmail TEXT,
@@ -141,6 +143,20 @@ class DatabaseHelper {
     }
     return {};
   }
+
+  Future<Map<String, dynamic>> getLoginInfoByDiD(String did) async {
+    final db = await database;
+    final result = await db.query(
+      table,
+      where: '$columnDid = ?',
+      whereArgs: [did],
+    );
+    if (result.isNotEmpty) {
+      return result.first;
+    }
+    return {};
+  }
+
 
   Future<void> updateLoginInfoByHandleAndService(String handle, String service, Map<String, dynamic> loginInfo) async {
     final db = await database;

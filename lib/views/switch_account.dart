@@ -3,7 +3,8 @@ import 'package:moyousky/utils/database_helper.dart' as dh;
 import 'package:moyousky/views/login.dart' as li;
 import 'package:moyousky/repository/shared_preferences_repository.dart';
 import 'package:moyousky/views/timeline.dart';
-import 'package:moyousky/widgets/headerLogo.dart' as hl;
+import 'package:moyousky/widgets/common/headerLogo.dart' as hl;
+import 'package:moyousky/animation/fade_route.dart';
 
 class SwitchAccountScreen extends StatefulWidget {
   const SwitchAccountScreen({super.key});
@@ -43,7 +44,9 @@ class SwitchAccountScreenState extends State<SwitchAccountScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black54),
           onPressed: () {
-            Navigator.of(context).pop();
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
           },
         ),
         actions: <Widget>[
@@ -91,10 +94,8 @@ class SwitchAccountScreenState extends State<SwitchAccountScreen> {
               onTap: () async {
                 await _sharedPreferencesRepo.setId(account['handle']);
                 await _sharedPreferencesRepo.setService(account['service']);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => Timeline()),
-                );
+                await _sharedPreferencesRepo.setDid(account['did']);
+                Navigator.of(context).push(FadeRoute(page: Timeline()));
               },
             );
           }).toList(),

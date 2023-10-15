@@ -27,6 +27,7 @@ dependencies:
   path_provider: ^2.0.2
   sqflite_sqlcipher:
   flutter_secure_storage:
+  share: ^2.0.4
 
 dev_dependencies:
   flutter_test:
@@ -46,7 +47,7 @@ flutter:
     - family: NotoSunsJP
       fonts:
         - asset: 'assets/font/NotoSansJP-Regular.ttf'
-        - asset: 'assets/font/NotoSansJP-ExtraBold.ttf'
+        - asset: 'assets/font/NotoSansJP-SemiBold.ttf'
           weight: 700
 
   # To add assets to your application, add an assets section, like this:

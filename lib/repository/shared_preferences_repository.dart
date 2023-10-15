@@ -30,4 +30,11 @@ class SharedPreferencesRepository {
     (await sharedPreferences).setString('id', id);
   }
 
+  Future<String> getDiD() async {
+    return (await sharedPreferences).getString('did') ?? '';
+  }
+
+  Future<void> setDid(String did) async {
+    (await sharedPreferences).setString('did', did);
+  }
 }

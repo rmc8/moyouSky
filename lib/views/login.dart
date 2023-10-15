@@ -1,24 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bluesky/bluesky.dart' as bsky;
 
 import 'package:moyousky/controllers/providers.dart';
 import 'package:moyousky/views/timeline.dart';
-import 'package:moyousky/widgets/headerLogo.dart' as hl;
+import 'package:moyousky/widgets/common/headerLogo.dart' as hl;
+import 'package:moyousky/views/switch_account.dart';
+import 'package:moyousky/animation/fade_route.dart';
 
-class LoginScreen extends ConsumerWidget {
+class LoginScreen extends StatefulWidget {
   LoginScreen({Key? key}) : super(key: key);
 
-  static const _defaultService = 'bsky.social';
+  @override
+  LoginScreenState createState() => LoginScreenState();
+}
 
+class LoginScreenState extends State<LoginScreen> {
+  bool isLoading = false; // 新しく追加
   final _serviceController = TextEditingController(text: _defaultService);
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  static const _defaultService = 'bsky.social';
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: hl.HeaderLogo(title: 'Login'),
@@ -26,7 +34,14 @@ class LoginScreen extends ConsumerWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black54),
           onPressed: () {
-            Navigator.of(context).pop();
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                    builder: (context) => const SwitchAccountScreen()),
+              );
+            }
           },
         ),
         actions: <Widget>[
@@ -81,40 +96,52 @@ class LoginScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 32.0),
-              ElevatedButton(
-                onPressed: () async {
-                  String service = _serviceController.text.trim();
-                  String id = _usernameController.text.trim();
-                  final password = _passwordController.text.trim();
+              Consumer(
+                builder: (context, WidgetRef ref, child) {
+                  return ElevatedButton(
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                      setState(() {
+                        isLoading = true;
+                      });
 
-                  if (service.isEmpty) {
-                    service = _serviceController.text = _defaultService;
-                  }
-                  if (!id.contains('.')) {
-                    id += '.$service';
-                  }
-                  try {
-                    if (!bsky.isValidAppPassword(password)) {
-                      throw Exception('Not a valid app password.');
-                    }
-                    await ref
-                        .read(loginStateProvider.notifier)
-                        .login(service, id, password);
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Timeline()),
-                    );
-                  } catch (e) {
-                    // ignore: use_build_context_synchronously
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(e.toString()),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
+                      String service = _serviceController.text.trim();
+                      String id = _usernameController.text.trim();
+                      final password = _passwordController.text.trim();
+
+                      if (service.isEmpty) {
+                        service = _serviceController.text = _defaultService;
+                      }
+                      if (!id.contains('.')) {
+                        id += '.$service';
+                      }
+
+                      try {
+                        // if (!bsky.isValidAppPassword(password)) {
+                        //   throw Exception('Not a valid app password.');
+                        // }
+
+                        await ref
+                            .read(loginStateProvider.notifier)
+                            .login(service, id, password);
+                        Navigator.of(context).push(FadeRoute(page: Timeline()));
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(e.toString()),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      } finally {
+                        setState(() {
+                          isLoading = false;
+                        });
+                      }
+                    },
+                    child: isLoading ? CircularProgressIndicator() : const Text('Login'),
+                  );
                 },
-                child: const Text('Login'),
               ),
             ],
           ),
