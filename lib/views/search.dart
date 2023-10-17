@@ -30,6 +30,7 @@ class _SearchScreenState extends State<SearchScreen> {
   final BlueskyApiService apiService = BlueskyApiService();
   Timer? _debounce;
   List<Post> _postResults = [];
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -60,7 +61,10 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _performPostSearch(String query) async {
     if (trimLeftHash(query).isEmpty) return;
-
+    setState(() {
+      isLoading = true;
+    });
+    print('hoge');
     try {
       final response = await apiService.searchForPost(trimLeftHash(query));
       if (response.containsKey('data')) {
@@ -70,6 +74,10 @@ class _SearchScreenState extends State<SearchScreen> {
       }
     } catch (e) {
       print("Error performing post search: $e");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -120,42 +128,53 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
         drawer: const MainDrawer(),
-        body: _postResults.isNotEmpty
-            ? ListView.builder(
-                itemCount: _postResults.length,
-                itemBuilder: (context, index) {
-                  return _postResults[index];
-                },
-              )
-            : ListView.builder(
-                itemCount: _searchResults.length,
-                itemBuilder: (context, index) {
-                  final actor = _searchResults[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage:
-                          actor.avatarUrl != null && actor.avatarUrl.isNotEmpty
+        body: Stack(
+          children: [
+            // Post results
+            _postResults.isNotEmpty
+                ? ListView.builder(
+                    itemCount: _postResults.length,
+                    itemBuilder: (context, index) {
+                      return _postResults[index];
+                    },
+                  )
+                : ListView.builder(
+                    itemCount: _searchResults.length,
+                    itemBuilder: (context, index) {
+                      final actor = _searchResults[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: actor.avatarUrl != null &&
+                                  actor.avatarUrl.isNotEmpty
                               ? NetworkImage(actor.avatarUrl)
                               : null,
-                      child: actor.avatarUrl == null || actor.avatarUrl.isEmpty
-                          ? const Icon(Icons.person, color: Colors.white)
-                          : null,
-                    ),
-                    title: Text(actor.displayName,
-                        style: const TextStyle(
-                          fontFamily: cons.DEFAULT_FONT,
-                        )),
-                    subtitle: Text(actor.handle,
-                        style: const TextStyle(
-                          fontFamily: cons.DEFAULT_FONT,
-                        )),
-                    onTap: () {
-                      // ユーザープロフィールへの遷移やprintなどのロジックをここに追加
-                      print('Selected user handle: ${actor.handle}');
+                          child: actor.avatarUrl == null ||
+                                  actor.avatarUrl.isEmpty
+                              ? const Icon(Icons.person, color: Colors.white)
+                              : null,
+                        ),
+                        title: Text(actor.displayName,
+                            style: const TextStyle(
+                              fontFamily: cons.DEFAULT_FONT,
+                            )),
+                        subtitle: Text(actor.handle,
+                            style: const TextStyle(
+                              fontFamily: cons.DEFAULT_FONT,
+                            )),
+                        onTap: () {
+                          // ユーザープロフィールへの遷移やprintなどのロジックをここに追加
+                          print('Selected user handle: ${actor.handle}');
+                        },
+                      );
                     },
-                  );
-                },
+                  ),
+            // Loading indicator
+            if (isLoading)
+              const Center(
+                child: CircularProgressIndicator(),
               ),
+          ],
+        ),
         bottomNavigationBar: BskyBottomNavigationBar(
           onTap: (index) {
             if (index == 0) {

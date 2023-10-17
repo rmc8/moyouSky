@@ -4,6 +4,8 @@ import 'package:moyousky/services/bluesky_api_service.dart';
 import 'package:moyousky/widgets/post/actions/actions.dart';
 import 'package:moyousky/widgets/post/post_component/post_widgets.dart';
 import 'package:moyousky/repository/shared_preferences_repository.dart' as spr;
+import 'package:moyousky/animation/fade_route.dart';
+import 'package:moyousky/views/user_profile.dart';
 
 class Post extends StatefulWidget {
   final Map<String, dynamic> feedView;
@@ -89,24 +91,29 @@ class PostState extends State<Post> {
                           )),
                     ],
                   )),
-              const SizedBox(height: 8.0),
+              const SizedBox(height: 6.0),
             ],
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 8, left: 4, bottom: 8),
-                  child: CircleAvatar(
-                    backgroundImage: (author['avatar'] != null &&
-                            author['avatar'].isNotEmpty)
-                        ? NetworkImage(author['avatar'])
-                        : null,
-                    child:
-                        (author['avatar'] == null || author['avatar'].isEmpty)
-                            ? const Icon(Icons.person, color: Colors.white)
-                            : null,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(FadeRoute(
+                          page: UserProfile(did: author['did'])));
+                    },
+                    child: CircleAvatar(
+                      backgroundImage: (author['avatar'] != null && author['avatar'].isNotEmpty)
+                          ? NetworkImage(author['avatar'])
+                          : null,
+                      child: (author['avatar'] == null || author['avatar'].isEmpty)
+                          ? const Icon(Icons.person, color: Colors.white)
+                          : null,
+                    ),
                   ),
                 ),
+
                 const SizedBox(width: 16.0),
                 Expanded(
                   child: Column(
@@ -141,7 +148,7 @@ class PostState extends State<Post> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8.0),
+                      const SizedBox(height: 4.0),
                       if (parentPostAuthor != null) ...[
                         Row(
                           children: [
@@ -155,7 +162,7 @@ class PostState extends State<Post> {
                                 )),
                           ],
                         ),
-                        const SizedBox(height: 4.0),
+                        const SizedBox(height: 2.0),
                       ],
                       FacetsProcessing(
                         postData: {
@@ -167,7 +174,7 @@ class PostState extends State<Post> {
                           }
                         },
                       ),
-                      const SizedBox(height: 16.0),
+                      const SizedBox(height: 13.5),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
@@ -200,7 +207,7 @@ class PostState extends State<Post> {
                                 likeCount += countChange;
                               });
                             }),
-                            color: isLiked ? Colors.red : Colors.black45,
+                            color: isLiked ? Colors.redAccent : Colors.black45,
                           ),
                           GestureDetector(
                             onTap: () => showBottomSheetCustom(context,

@@ -9,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod: ^2.4.0
   timeago: ^3.5.0
   flutter_localizations:
     sdk: flutter
@@ -28,7 +27,7 @@ dependencies:
   sqflite_sqlcipher:
   flutter_secure_storage:
   share: ^2.0.4
-
+  flutter_riverpod: ^2.4.4
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -37,7 +36,7 @@ dev_dependencies:
   flutter_gen_runner:
   json_serializable: ^6.3.1
   flutter_launcher_icons: ^0.13.1
-
+  flutter_linkify: ^6.0.0
 flutter:
   generate: true
   uses-material-design: true

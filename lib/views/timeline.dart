@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:moyousky/widgets/post/post.dart';
 import 'package:moyousky/services/bluesky_api_service.dart';
 import 'package:moyousky/utils/post_utils.dart';
@@ -8,40 +10,93 @@ import 'package:moyousky/views/search.dart';
 import 'package:moyousky/animation/fade_route.dart';
 import 'package:moyousky/widgets/drawer_button/main_drawer_btn.dart';
 import 'package:moyousky/widgets/navigation/bottom_navi.dart';
+import 'package:moyousky/notifiers/timeline_notifier.dart';
+import 'package:moyousky/repository/shared_preferences_repository.dart'; // 追加しました
 
-class Timeline extends StatefulWidget {
+final blueskyApiServiceProvider = Provider<BlueskyApiService>((ref) {
+  return BlueskyApiService();
+});
+
+final timelineNotifierProvider = StateNotifierProvider<TimelineNotifier,
+        Map<String, List<PostWithTimestamp>>>(
+    (ref) => TimelineNotifier(ref.read(blueskyApiServiceProvider)));
+
+final prefs = SharedPreferencesRepository();
+
+class Timeline extends ConsumerStatefulWidget {
   const Timeline({Key? key}) : super(key: key);
 
   @override
   TimelineState createState() => TimelineState();
 }
 
-class TimelineState extends State<Timeline> {
+class TimelineState extends ConsumerState<Timeline>
+    with AutomaticKeepAliveClientMixin<Timeline> {
   List<Post> posts = [];
+  List<Map> postsJson = []; // 追加
   bool isLoading = false;
   bool showToTopButton = false;
+  String? did;
 
-  // final prefsRepository = SharedPreferencesRepository();
+  TimelineState({this.posts = const []});
+
+  @override
+  bool get wantKeepAlive => true;
+
   late final apiService = BlueskyApiService();
   String cursor = "";
   String? nextCursor;
   final _scrollController = ScrollController();
 
+  TimelineState copyWith({List<Post>? posts}) {
+    return TimelineState(posts: posts ?? this.posts);
+  }
+
+  late final StreamSubscription<String> _didChangeSubscription;
+
   @override
   void initState() {
     super.initState();
-    setState(() {
-      isLoading = true;
-    });
-    _fetchPosts();
     _scrollController.addListener(_scrollListener);
+
+    _didChangeSubscription = prefs.didChange.listen((newDid) {
+      print(newDid);
+      setState(() {
+        did = newDid;
+        _initializeData();
+      });
+    });
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _initializeData();
+    });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _didChangeSubscription.cancel();
     super.dispose();
   }
+
+  Future<void> _initializeData() async {
+    did = await prefs.getDiD();
+    final postsData = ref.read(timelineNotifierProvider.notifier).getPostsData(did!);
+
+    if (postsData != null && postsData.isNotEmpty) {
+      final List<Post> postsFromData = getPostWidgets(postsData.cast<Map<String, dynamic>>());
+      setState(() {
+        posts = postsFromData;
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        isLoading = true;
+      });
+      _fetchPosts();
+    }
+  }
+
 
   _scrollListener() {
     if (_scrollController.offset > 300 && !showToTopButton) {
@@ -74,12 +129,15 @@ class TimelineState extends State<Timeline> {
   Future<void> _fetchPosts() async {
     final feedViews = await apiService.getTimeline(limit: 32, cursor: cursor);
     final List<Post> fetchedPosts = getPostWidgets(feedViews.feeds);
+
     nextCursor = feedViews.cursor;
+    ref.read(timelineNotifierProvider.notifier).savePostsData(did!, feedViews.feeds);
 
     setState(() {
       posts = fetchedPosts;
       isLoading = false;
     });
+
   }
 
   Future<void> _fetchPastPosts() async {
@@ -87,6 +145,7 @@ class TimelineState extends State<Timeline> {
         await apiService.getTimeline(limit: 32, cursor: nextCursor);
     final List<Post> fetchedPosts = getPostWidgets(feedViews.feeds);
     nextCursor = feedViews.cursor;
+    ref.read(timelineNotifierProvider.notifier).savePostsData(did!, feedViews.feeds);
 
     setState(() {
       posts.addAll(fetchedPosts);
@@ -98,7 +157,7 @@ class TimelineState extends State<Timeline> {
     final feedViews = await apiService.getTimeline(limit: 32, cursor: cursor);
     final fetchedPosts = getPostWidgets(feedViews.feeds);
     final List<Post> newPosts = [];
-
+    ref.read(timelineNotifierProvider.notifier).savePostsData(did!, feedViews.feeds);
     for (var post in fetchedPosts) {
       if (!posts.contains(post)) {
         newPosts.add(post);
@@ -116,6 +175,8 @@ class TimelineState extends State<Timeline> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+    final did = prefs.getDiD();
     return Scaffold(
       appBar: AppBar(
         leading: Builder(
@@ -147,6 +208,7 @@ class TimelineState extends State<Timeline> {
             controller: _scrollController,
             itemCount: posts.length,
             itemBuilder: (context, index) => posts[index],
+            addAutomaticKeepAlives: true,
           ),
           if (isLoading)
             const Center(

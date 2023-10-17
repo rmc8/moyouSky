@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesRepository {
@@ -34,7 +35,16 @@ class SharedPreferencesRepository {
     return (await sharedPreferences).getString('did') ?? '';
   }
 
+  final _didChangeController = StreamController<String>.broadcast();
+
+  Stream<String> get didChange => _didChangeController.stream;
+
   Future<void> setDid(String did) async {
     (await sharedPreferences).setString('did', did);
+    _didChangeController.add(did);
+  }
+
+  void dispose() {
+    _didChangeController.close();
   }
 }

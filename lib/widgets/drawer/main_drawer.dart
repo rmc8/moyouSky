@@ -7,6 +7,8 @@ import 'package:moyousky/widgets/drawer/child_widgets/switch_account_section.dar
 import 'package:moyousky/widgets/drawer/child_widgets/drawer_menu.dart';
 import 'package:moyousky/utils/database_helper.dart' as dh;
 import 'package:moyousky/repository/shared_preferences_repository.dart' as spr;
+import 'package:moyousky/views/user_profile.dart';
+import 'package:moyousky/animation/fade_route.dart';
 
 class MainDrawer extends StatefulWidget {
   const MainDrawer({super.key});
@@ -49,7 +51,9 @@ class MainDrawerState extends State<MainDrawer> {
                   profileData = localProfileSnapshot.data!;
 
                   final imageUrl = profileData['avatar_url'] ?? "";
-                  final name = profileData['display_name'] ?? profileData['handle'] ?? "";
+                  final name = profileData['display_name'] ??
+                      profileData['handle'] ??
+                      "";
                   final userId = profileData['handle'] ?? "";
                   final followsCount = profileData['follows_count'] ?? 0;
                   final followersCount = profileData['followers_count'] ?? 0;
@@ -66,9 +70,13 @@ class MainDrawerState extends State<MainDrawer> {
                               followers: followersCount,
                               following: followsCount,
                             ),
-                            const DrawerMenuItem(
+                            DrawerMenuItem(
                               title: 'プロフィール',
                               iconData: Icons.account_circle_rounded,
+                              onTapFunction: () {
+                                Navigator.of(context).push(FadeRoute(
+                                    page: UserProfile(did: did)));
+                              },
                             ),
                             const SwitchAccountList(),
                             const DrawerMenuItem(
@@ -98,6 +106,7 @@ class MainDrawerState extends State<MainDrawer> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(32.0),
                                   border: Border.all(color: Colors.redAccent),
+                                  color: Colors.white,
                                 ),
                                 child: const Align(
                                   widthFactor: 0.6,
