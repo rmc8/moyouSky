@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bluesky/bluesky.dart';
 import 'package:moyousky/services/bluesky_api_service.dart';
 import 'package:moyousky/animation/fade_route.dart';
 import 'package:moyousky/widgets/navigation/bottom_navi.dart';
@@ -21,7 +22,7 @@ class UserProfileState extends State<UserProfile>
     with SingleTickerProviderStateMixin {
   TabController? _tabController;
   final BlueskyApiService _apiService = BlueskyApiService();
-  Map<String, dynamic>? profileData;
+  ActorProfile? profileData;
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class UserProfileState extends State<UserProfile>
 
   Future<void> _fetchProfile() async {
     try {
-      final data = await _apiService.fetchProfileData(widget.did);
+      final data = await _apiService.fetchProfileDataObj(widget.did);
       setState(() {
         profileData = data;
       });

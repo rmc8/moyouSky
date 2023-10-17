@@ -11,7 +11,8 @@ import 'package:moyousky/animation/fade_route.dart';
 import 'package:moyousky/widgets/drawer_button/main_drawer_btn.dart';
 import 'package:moyousky/widgets/navigation/bottom_navi.dart';
 import 'package:moyousky/notifiers/timeline_notifier.dart';
-import 'package:moyousky/repository/shared_preferences_repository.dart'; // 追加しました
+import 'package:moyousky/repository/shared_preferences_repository.dart';
+import 'package:moyousky/utils/post_utils.dart';
 
 final blueskyApiServiceProvider = Provider<BlueskyApiService>((ref) {
   return BlueskyApiService();
@@ -33,7 +34,7 @@ class Timeline extends ConsumerStatefulWidget {
 class TimelineState extends ConsumerState<Timeline>
     with AutomaticKeepAliveClientMixin<Timeline> {
   List<Post> posts = [];
-  List<Map> postsJson = []; // 追加
+  List<Map> postsJson = [];
   bool isLoading = false;
   bool showToTopButton = false;
   String? did;
@@ -83,8 +84,8 @@ class TimelineState extends ConsumerState<Timeline>
     did = await prefs.getDiD();
     final postsData = ref.read(timelineNotifierProvider.notifier).getPostsData(did!);
 
-    if (postsData != null && postsData.isNotEmpty) {
-      final List<Post> postsFromData = getPostWidgets(postsData.cast<Map<String, dynamic>>());
+    if (postsData != null) {
+      final List<Post> postsFromData = getPostWidgets(postsData);
       setState(() {
         posts = postsFromData;
         isLoading = false;

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:moyousky/widgets/user_profile/component/avatar_builder.dart';
 import 'package:moyousky/widgets/user_profile/component/count_label.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:bluesky/bluesky.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UserProfileHeader extends StatelessWidget {
-  final Map<String, dynamic>? profileData;
+  final ActorProfile? profileData;
 
   const UserProfileHeader({Key? key, required this.profileData})
       : super(key: key);
@@ -23,10 +24,9 @@ class UserProfileHeader extends StatelessWidget {
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                 color: Colors.white,
-                image: profileData?['banner'] != null &&
-                        profileData?['banner']!.isNotEmpty
+                image: profileData?.banner!= null
                     ? DecorationImage(
-                        image: NetworkImage(profileData?['banner'] ?? ''),
+                        image: NetworkImage(profileData?.banner ?? ''),
                         fit: BoxFit.scaleDown,
                       )
                     : null,
@@ -39,13 +39,13 @@ class UserProfileHeader extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 // Avatar
-                AvatarBuilder(avatarUrl: profileData?['avatar']),
+                AvatarBuilder(avatarUrl: profileData?.avatar),
                 Text(
-                  profileData?['displayName'] ?? profileData?['handle'] ?? '',
+                  profileData?.displayName ?? profileData?.handle ?? '',
                   style: const TextStyle(
                       fontSize: 24.0, fontWeight: FontWeight.bold),
                 ),
-                Text('@' + (profileData?['handle'] ?? ''),
+                Text('@' + (profileData?.handle ?? ''),
                     style:
                         const TextStyle(color: Colors.black54, fontSize: 14.0)),
                 Padding(
@@ -54,19 +54,19 @@ class UserProfileHeader extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
                       CountLabel(
-                          count: profileData?['followersCount']?.toString(),
+                          count: profileData?.followersCount?.toString(),
                           label: 'フォロワー',
                           onTap: () {
                             // TODO: フォロワーのリストを表示するロジックを追加
                           }),
                       CountLabel(
-                          count: profileData?['followsCount']?.toString(),
+                          count: profileData?.followsCount?.toString(),
                           label: 'フォロー',
                           onTap: () {
                             // TODO: フォローのリストを表示するロジックを追加
                           }),
                       CountLabel(
-                        count: profileData?['postsCount']?.toString(),
+                        count: profileData?.postsCount?.toString(),
                         label: 'ポスト数',
                       ),
                     ],
@@ -86,7 +86,7 @@ class UserProfileHeader extends StatelessWidget {
                             print('Could not launch ${link.url}. Error: $e');
                           }
                         },
-                        text: profileData?['description'] ?? '',
+                        text: profileData?.description ?? '',
                         style: const TextStyle(color: Colors.black),
                         linkStyle: const TextStyle(color: Colors.blueAccent),
                       ),

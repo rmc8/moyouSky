@@ -73,13 +73,13 @@ class LoginStateNotifier extends StateNotifier<bool> {
       await sharedPreferencesRepository.setService(service);
       await sharedPreferencesRepository.setId(res.data.handle.toString());
       await sharedPreferencesRepository.setDid(res.data.did.toString());
-      final profileData = await prf.fetchProfileData(res.data.handle);
+      final profileData = await prf.fetchProfileDataObj(res.data.handle);
       final Map<String, dynamic> userDataToInsert = {
-        'display_name': profileData['displayName'],
-        'avatar_url': profileData['avatar'],
-        'followers_count': profileData['followersCount'],
-        'follows_count': profileData['followsCount'],
-        'description': profileData['description'],
+        'display_name': profileData.displayName,
+        'avatar_url': profileData.avatar ?? '',
+        'followers_count': profileData.followersCount,
+        'follows_count': profileData.followsCount,
+        'description': profileData.description,
       };
       await DatabaseHelper.instance.updateLoginInfoByHandleAndService(res.data.handle, service, userDataToInsert);
       state = true;

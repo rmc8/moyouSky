@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:bluesky/bluesky.dart' as bsky;
 import 'package:moyousky/services/bluesky_api_service.dart';
 
 Future<void> handleRepostAction(
-    Map<String, dynamic> post,
+    bsky.Post post,
     bool isReposted,
     BlueskyApiService apiService,
     Function(bool, int) updateState) async {
 
-  String cid = post['cid'];
-  String uri = post['uri'];
+  String cid = post.cid;
+  String uri = post.uri.toString();
   if (isReposted) {
     await apiService.deletePost(uri);
     updateState(false, -1);
@@ -19,18 +20,19 @@ Future<void> handleRepostAction(
 }
 
 Future<void> handleFavoriteAction(
-    Map<String, dynamic> post,
+    bsky.Post post,
     bool isLiked,
     BlueskyApiService apiService,
     Function(bool, int) updateState) async {
 
-  String cid = post['cid'];
-  String uri = post['uri'];
+  String cid = post.cid;
+  bsky.AtUri uri = post.uri;
+
   if (isLiked) {
-    await apiService.deletePost(uri);
+    await apiService.deletePost(uri.toString());
     updateState(false, -1);
   } else {
-    await apiService.likePost(cid, uri);
+    await apiService.likePost(cid, uri.toString());
     updateState(true, 1);
   }
 }

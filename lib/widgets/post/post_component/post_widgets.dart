@@ -5,8 +5,9 @@ import 'package:moyousky/views/report.dart';
 import 'package:moyousky/widgets/post/actions/actions.dart';
 import 'package:moyousky/services/bluesky_api_service.dart';
 import 'package:moyousky/animation/fade_route.dart';
+import 'package:bluesky/bluesky.dart' as bsky;
 
-void showBottomSheetCustom(BuildContext context, Map<String, dynamic> feedView,
+void showBottomSheetCustom(BuildContext context, bsky.FeedView feedView,
     BlueskyApiService apiService, bool myOwnPost) {
   showModalBottomSheet(
     context: context,
@@ -25,7 +26,7 @@ void showBottomSheetCustom(BuildContext context, Map<String, dynamic> feedView,
               leading: const Icon(Icons.share),
               title: const Text('共有'),
               onTap: () {
-                final postUri = feedView['post']['uri'];
+                final postUri = feedView.post.uri.toString();
                 Share.share(postUri);
               },
             ),
@@ -34,7 +35,7 @@ void showBottomSheetCustom(BuildContext context, Map<String, dynamic> feedView,
             leading: const Icon(Icons.content_copy),
             title: const Text('ポストをコピー'),
             onTap: () {
-              final postContent = feedView['post']['record']['text'];
+              final postContent = feedView.post.record.text.toString();
               Clipboard.setData(ClipboardData(text: postContent));
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -50,7 +51,7 @@ void showBottomSheetCustom(BuildContext context, Map<String, dynamic> feedView,
               title: const Text('ポストを削除'),
               onTap: () {
                 handleDeleteAction(
-                    context, feedView['post']['uri'], apiService);
+                    context, feedView.post.uri.toString(), apiService);
               },
             ),
           ],
@@ -62,7 +63,7 @@ void showBottomSheetCustom(BuildContext context, Map<String, dynamic> feedView,
                 Navigator.of(context).push(
                   FadeRoute(
                     page: ReportScreen(
-                      postDid: feedView['post']['author']['did'] ?? '',
+                      postDid: feedView.post.author.did ?? '',
                       apiService: apiService,
                     ),
                   ),

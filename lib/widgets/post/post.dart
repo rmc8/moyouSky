@@ -6,9 +6,10 @@ import 'package:moyousky/widgets/post/post_component/post_widgets.dart';
 import 'package:moyousky/repository/shared_preferences_repository.dart' as spr;
 import 'package:moyousky/animation/fade_route.dart';
 import 'package:moyousky/views/user_profile.dart';
+import 'package:bluesky/bluesky.dart' as bsky;
 
 class Post extends StatefulWidget {
-  final Map<String, dynamic> feedView;
+  final bsky.FeedView feedView;
   final String postTime;
 
   const Post({
@@ -28,25 +29,25 @@ class PostState extends State<Post> {
   int repostCount = 0;
   bool myOwnPost = false;
 
-  String get postDid => widget.feedView['post']['author']['did'] ?? '';
+  String get postDid => widget.feedView.post.author.did ?? '';
   late final BlueskyApiService apiService;
   final sharedPreferencesRepository = spr.SharedPreferencesRepository();
 
   @override
   void initState() {
     super.initState();
-    likeCount = widget.feedView['post']['likeCount'];
-    repostCount = widget.feedView['post']['repostCount'];
-    isLiked = widget.feedView['post']['viewer']['like'] != null ? true : false;
+    likeCount = widget.feedView.post.likeCount;
+    repostCount = widget.feedView.post.repostCount;
+    isLiked = widget.feedView.post.viewer.like != null ? true : false;
     isReposted =
-        widget.feedView['post']['viewer']['repost'] != null ? true : false;
+        widget.feedView.post.viewer.repost != null ? true : false;
     apiService = BlueskyApiService();
     _checkOwnership();
   }
 
   Future<void> _checkOwnership() async {
     String myDid = await sharedPreferencesRepository.getDiD();
-    String authorDid = widget.feedView['post']['author']['did'] ?? '';
+    String authorDid = widget.feedView.post.author.did ?? '';
     if (mounted) {
       setState(() {
         myOwnPost = myDid == authorDid;
@@ -56,10 +57,10 @@ class PostState extends State<Post> {
 
   @override
   Widget build(BuildContext context) {
-    final post = widget.feedView['post'];
-    final author = post['author'];
-    final reason = widget.feedView['reason'];
-    final parentPostAuthor = widget.feedView?['reply']?['parent']?['author']?['displayName'];
+    final post = widget.feedView.post;
+    final author = post.author;
+    final reason = widget.feedView.toJson()['reason'];
+    final parentPostAuthor = widget.feedView.toJson()?['reply']?['parent']?['author']?['displayName'];
 
     return Container(
       decoration: BoxDecoration(
@@ -101,13 +102,13 @@ class PostState extends State<Post> {
                   child: GestureDetector(
                     onTap: () {
                       Navigator.of(context).push(FadeRoute(
-                          page: UserProfile(did: author['did'])));
+                          page: UserProfile(did: author.did)));
                     },
                     child: CircleAvatar(
-                      backgroundImage: (author['avatar'] != null && author['avatar'].isNotEmpty)
-                          ? NetworkImage(author['avatar'])
+                      backgroundImage: (author.avatar != null)
+                          ? NetworkImage(author.avatar.toString())
                           : null,
-                      child: (author['avatar'] == null || author['avatar'].isEmpty)
+                      child: (author.avatar == null)
                           ? const Icon(Icons.person, color: Colors.white)
                           : null,
                     ),
@@ -126,14 +127,14 @@ class PostState extends State<Post> {
                               TextSpan(
                                 children: [
                                   TextSpan(
-                                    text: '${author['displayName']} ',
+                                    text: author.displayName.toString(),
                                     style: const TextStyle(
                                       fontSize: 18.5,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   TextSpan(
-                                    text: '@${author['handle']}',
+                                    text: '@${author.handle.toString()}',
                                     style:
                                         const TextStyle(color: Colors.black45),
                                   ),
@@ -168,8 +169,8 @@ class PostState extends State<Post> {
                         postData: {
                           'post': {
                             'record': {
-                              'text': post['record']['text'],
-                              'facets': post['record']['facets'] ?? [],
+                              'text': post.record.text.toString(),
+                              'facets': post.record.toJson()['facets'] ?? [],
                             }
                           }
                         },
@@ -180,14 +181,14 @@ class PostState extends State<Post> {
                         children: [
                           iconTextWidget(
                             Icons.comment_rounded,
-                            post['replyCount'],
+                            post.replyCount,
                             (_) {},
                           ),
                           iconTextWidget(
                             Icons.repeat,
                             repostCount,
                             () => handleRepostAction(
-                                widget.feedView['post'], isReposted, apiService,
+                                widget.feedView.post, isReposted, apiService,
                                 (newState, countChange) {
                               setState(() {
                                 isReposted = newState;
@@ -200,7 +201,7 @@ class PostState extends State<Post> {
                             Icons.favorite,
                             likeCount,
                             () => handleFavoriteAction(
-                                widget.feedView['post'], isLiked, apiService,
+                                widget.feedView.post, isLiked, apiService,
                                 (newState, countChange) {
                               setState(() {
                                 isLiked = newState;

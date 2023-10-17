@@ -8,7 +8,7 @@ import 'package:moyousky/animation/fade_route.dart';
 import 'package:moyousky/widgets/drawer/main_drawer.dart';
 import 'package:moyousky/widgets/drawer_button/main_drawer_btn.dart';
 import 'package:moyousky/widgets/post/post.dart';
-import 'package:moyousky/models/post.dart';
+import 'package:moyousky/utils/post_utils.dart';
 import 'package:moyousky/widgets/navigation/bottom_navi.dart';
 
 String trimLeftHash(String input) {

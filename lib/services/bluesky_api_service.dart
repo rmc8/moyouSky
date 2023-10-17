@@ -5,8 +5,6 @@ import 'package:bluesky/bluesky.dart' as bsky;
 import 'package:moyousky/utils/database_helper.dart';
 import 'package:moyousky/repository/shared_preferences_repository.dart';
 
-
-
 class BlueskySessionResult {
   final bsky.Session? session;
   final bsky.Bluesky bluesky;
@@ -21,6 +19,13 @@ class TimelineResult {
   TimelineResult({required this.feeds, required this.cursor});
 }
 
+class TimelineResultObj {
+  final List<bsky.FeedView> feeds;
+  final String cursor;
+
+  TimelineResultObj({required this.feeds, required this.cursor});
+}
+
 class BlueskyApiService {
   final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
   bsky.Bluesky? _bluesky;
@@ -28,8 +33,9 @@ class BlueskyApiService {
   BlueskyApiService();
 
   Future<BlueskySessionResult> getBlueskySession() async {
-    if (_bluesky != null)
+    if (_bluesky != null) {
       return BlueskySessionResult(session: null, bluesky: _bluesky!);
+    }
 
     // SharedPreferencesからIDを取得
     final spr = SharedPreferencesRepository();
@@ -58,16 +64,16 @@ class BlueskyApiService {
     return BlueskySessionResult(session: response.data, bluesky: _bluesky!);
   }
 
-  Future<TimelineResult> getTimeline({int limit = 32, String? cursor}) async {
+  Future<TimelineResultObj> getTimeline({int limit = 32, String? cursor}) async {
     final blueskyInstance = (await getBlueskySession()).bluesky;
     final pagination = blueskyInstance.feeds.paginateTimeline(cursor: cursor);
     String nextCursor = "";
 
-    final List<Map<String, dynamic>> allFeeds = [];
+    final List<bsky.FeedView> allFeeds = [];
 
     while (pagination.hasNext && allFeeds.length < limit) {
       final response = await pagination.next();
-      allFeeds.addAll(response.data.toJson()['feed']);
+      allFeeds.addAll(response.data.feed);
 
       if (allFeeds.length > limit) {
         allFeeds.length = limit;
@@ -75,13 +81,13 @@ class BlueskyApiService {
       }
     }
     final raw = jsonEncode(allFeeds);
-    return TimelineResult(feeds: allFeeds, cursor: nextCursor);
+    return TimelineResultObj(feeds: allFeeds, cursor: nextCursor);
   }
 
-  Future<Map<String, dynamic>> fetchProfileData(String actor) async {
+  Future<bsky.ActorProfile> fetchProfileDataObj(String actor) async {
     final blueskyInstance = (await getBlueskySession()).bluesky;
     final profile = await blueskyInstance.actors.findProfile(actor: actor);
-    return profile.data.toJson();
+    return profile.data;
   }
 
   Future<Map<String, dynamic>> likePost(String cid, String uri) async {
