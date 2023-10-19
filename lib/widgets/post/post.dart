@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:moyousky/widgets/post/facets/facets.dart';
-import 'package:moyousky/services/bluesky_api_service.dart';
+import 'package:moyousky/services/post_service.dart';
+import 'package:moyousky/services/report_service.dart';
 import 'package:moyousky/widgets/post/actions/actions.dart';
 import 'package:moyousky/widgets/post/post_component/post_widgets.dart';
 import 'package:moyousky/repository/shared_preferences_repository.dart' as spr;
@@ -30,7 +31,8 @@ class PostState extends State<Post> {
   bool myOwnPost = false;
 
   String get postDid => widget.feedView.post.author.did ?? '';
-  late final BlueskyApiService apiService;
+  late final PostService postApiService;
+  late final ReportService reportApiService;
   final sharedPreferencesRepository = spr.SharedPreferencesRepository();
 
   @override
@@ -41,7 +43,8 @@ class PostState extends State<Post> {
     isLiked = widget.feedView.post.viewer.like != null ? true : false;
     isReposted =
         widget.feedView.post.viewer.repost != null ? true : false;
-    apiService = BlueskyApiService();
+    postApiService = PostService();
+    reportApiService = ReportService();
     _checkOwnership();
   }
 
@@ -155,14 +158,20 @@ class PostState extends State<Post> {
                           children: [
                             Icon(Icons.reply, color: Colors.grey[600]),
                             const SizedBox(width: 4.0),
-                            Text('$parentPostAuthorさんへ返信しました',
+                            Flexible(
+                              child: Text(
+                                '$parentPostAuthorさんへ返信しました',
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14.0,
                                   fontWeight: FontWeight.normal,
-                                )),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
+
                         const SizedBox(height: 2.0),
                       ],
                       FacetsProcessing(
@@ -188,7 +197,7 @@ class PostState extends State<Post> {
                             Icons.repeat,
                             repostCount,
                             () => handleRepostAction(
-                                widget.feedView.post, isReposted, apiService,
+                                widget.feedView.post, isReposted, postApiService,
                                 (newState, countChange) {
                               setState(() {
                                 isReposted = newState;
@@ -201,7 +210,7 @@ class PostState extends State<Post> {
                             Icons.favorite,
                             likeCount,
                             () => handleFavoriteAction(
-                                widget.feedView.post, isLiked, apiService,
+                                widget.feedView.post, isLiked, postApiService,
                                 (newState, countChange) {
                               setState(() {
                                 isLiked = newState;
@@ -212,7 +221,7 @@ class PostState extends State<Post> {
                           ),
                           GestureDetector(
                             onTap: () => showBottomSheetCustom(context,
-                                widget.feedView, apiService, myOwnPost),
+                                widget.feedView, postApiService, reportApiService, myOwnPost),
                             child: const Icon(
                               Icons.more_horiz,
                               color: Colors.black45,

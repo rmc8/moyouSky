@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:moyousky/models/user_list.dart';
-import 'package:moyousky/services/bluesky_api_service.dart';
+import 'package:moyousky/services/search_service.dart'; // 追加
 import 'package:moyousky/views/timeline.dart';
 import 'package:moyousky/utils/constants.dart' as cons;
 import 'package:moyousky/animation/fade_route.dart';
@@ -27,7 +27,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   late TextEditingController _controller;
   List<Actor> _searchResults = [];
-  final BlueskyApiService apiService = BlueskyApiService();
+  final  apiService = SearchServiceBeta(); // 1 positional argument expected by 'SearchServiceBeta.new', but 0 found. (Documentation)  Try adding the missing argument.
   Timer? _debounce;
   List<Post> _postResults = [];
   bool isLoading = false;

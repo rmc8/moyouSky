@@ -2,8 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bluesky/bluesky.dart' as bsky;
 import 'package:moyousky/repository/shared_preferences_repository.dart';
 import 'package:moyousky/utils/database_helper.dart';
-import 'package:moyousky/utils/database_helper.dart' as dh;
-import 'package:moyousky/services/bluesky_api_service.dart' as skys;
+import 'package:moyousky/services/actor_service.dart' as skys;
 
 final blueskySessionProvider = StreamProvider<bsky.Bluesky>((ref) async* {
   final sharedPreferencesRepository =
@@ -69,7 +68,7 @@ class LoginStateNotifier extends StateNotifier<bool> {
       };
       print(res.data);
       await DatabaseHelper.instance.insertLoginInfo(loginDataToInsert);
-      final prf = skys.BlueskyApiService();
+      final prf = skys.ActorService();
       await sharedPreferencesRepository.setService(service);
       await sharedPreferencesRepository.setId(res.data.handle.toString());
       await sharedPreferencesRepository.setDid(res.data.did.toString());

@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bluesky/bluesky.dart';
-import 'package:moyousky/services/bluesky_api_service.dart';
+import 'package:moyousky/services/actor_service.dart';
 import 'package:moyousky/animation/fade_route.dart';
 import 'package:moyousky/widgets/navigation/bottom_navi.dart';
 import 'package:moyousky/views/search.dart';
@@ -21,7 +20,7 @@ class UserProfile extends StatefulWidget {
 class UserProfileState extends State<UserProfile>
     with SingleTickerProviderStateMixin {
   TabController? _tabController;
-  final BlueskyApiService _apiService = BlueskyApiService();
+  final ActorService _apiService = ActorService();
   ActorProfile? profileData;
 
   @override
@@ -94,7 +93,7 @@ class UserProfileState extends State<UserProfile>
               ),
             ],
             bottom: PreferredSize(
-              preferredSize: Size.fromHeight(48.0),  // この高さはTabBarのデフォルトの高さです。適切に調整してください。
+              preferredSize: Size.fromHeight(48.0),
               child: Container(
                 color: Colors.white,  // 背景色を設定
                 child: TabBar(
@@ -113,7 +112,7 @@ class UserProfileState extends State<UserProfile>
           SliverFillRemaining(
             child: TabBarView(
               controller: _tabController,
-              children: const <Widget>[
+              children: const <Widget>[ // ここにそれぞれのタブに対応するタイムラインを実装したいです。
                 Center(child: Text('投稿の内容')),
                 Center(child: Text('返信の内容')),
                 Center(child: Text('画像の内容')),

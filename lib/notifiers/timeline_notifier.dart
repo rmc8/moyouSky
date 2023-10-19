@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:moyousky/utils/post_utils.dart';
-import 'package:moyousky/services/bluesky_api_service.dart';
+import 'package:moyousky/services/timeline_service.dart';
 import 'package:moyousky/widgets/post/post.dart' as pw;
 import 'package:bluesky/bluesky.dart' as bsky;
 
@@ -12,7 +12,7 @@ class PostWithTimestamp {
 }
 
 class TimelineNotifier extends StateNotifier<Map<String, List<PostWithTimestamp>>> {
-  final BlueskyApiService apiService;
+  final TimelineService apiService;
   Map<String, List<bsky.FeedView>> postsDataCache = {};
 
   TimelineNotifier(this.apiService) : super({});

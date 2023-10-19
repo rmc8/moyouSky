@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:bluesky/bluesky.dart' as bsky;
-import 'package:moyousky/services/bluesky_api_service.dart';
+import 'package:moyousky/services/report_service.dart';
 import 'package:moyousky/utils/constants.dart';
 
 class ReportScreen extends StatefulWidget {
   final String postDid;
-  final BlueskyApiService apiService;
+  final ReportService apiService;
 
   const ReportScreen(
       {super.key, required this.postDid, required this.apiService});

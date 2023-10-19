@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:moyousky/services/post_service.dart';
 import 'package:share/share.dart';
 import 'package:moyousky/views/report.dart';
 import 'package:moyousky/widgets/post/actions/actions.dart';
-import 'package:moyousky/services/bluesky_api_service.dart';
+import 'package:moyousky/services/post_service.dart';
+import 'package:moyousky/services/report_service.dart';
 import 'package:moyousky/animation/fade_route.dart';
 import 'package:bluesky/bluesky.dart' as bsky;
 
-void showBottomSheetCustom(BuildContext context, bsky.FeedView feedView,
-    BlueskyApiService apiService, bool myOwnPost) {
+void showBottomSheetCustom(
+    BuildContext context,
+    bsky.FeedView feedView,
+    PostService postApiService,
+    ReportService reportApiService,
+    bool myOwnPost) {
   showModalBottomSheet(
     context: context,
     builder: (context) {
@@ -51,7 +57,7 @@ void showBottomSheetCustom(BuildContext context, bsky.FeedView feedView,
               title: const Text('ポストを削除'),
               onTap: () {
                 handleDeleteAction(
-                    context, feedView.post.uri.toString(), apiService);
+                    context, feedView.post.uri.toString(), postApiService);
               },
             ),
           ],
@@ -64,7 +70,7 @@ void showBottomSheetCustom(BuildContext context, bsky.FeedView feedView,
                   FadeRoute(
                     page: ReportScreen(
                       postDid: feedView.post.author.did ?? '',
-                      apiService: apiService,
+                      apiService: reportApiService,
                     ),
                   ),
                 );

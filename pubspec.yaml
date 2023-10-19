@@ -85,5 +85,5 @@ flutter_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/icon/moyouSkyAppIcon.png"
-  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_background: "assets/icon/moyouSkyBanner.png" # #FFFFFF
   adaptive_icon_foreground: "assets/icon/moyouSkyAppAdaptIcon.png"

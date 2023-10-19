@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:moyousky/widgets/post/post.dart';
-import 'package:moyousky/services/bluesky_api_service.dart';
+import 'package:moyousky/services/timeline_service.dart';
 import 'package:moyousky/utils/post_utils.dart';
 import 'package:moyousky/widgets/drawer/main_drawer.dart';
 import 'package:moyousky/widgets/common/headerLogo.dart' as hl;
@@ -14,8 +14,8 @@ import 'package:moyousky/notifiers/timeline_notifier.dart';
 import 'package:moyousky/repository/shared_preferences_repository.dart';
 import 'package:moyousky/utils/post_utils.dart';
 
-final blueskyApiServiceProvider = Provider<BlueskyApiService>((ref) {
-  return BlueskyApiService();
+final blueskyApiServiceProvider = Provider<TimelineService>((ref) {
+  return TimelineService();
 });
 
 final timelineNotifierProvider = StateNotifierProvider<TimelineNotifier,
@@ -44,7 +44,7 @@ class TimelineState extends ConsumerState<Timeline>
   @override
   bool get wantKeepAlive => true;
 
-  late final apiService = BlueskyApiService();
+  late final apiService = TimelineService();
   String cursor = "";
   String? nextCursor;
   final _scrollController = ScrollController();

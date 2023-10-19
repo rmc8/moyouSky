@@ -4,12 +4,15 @@ import 'package:moyousky/widgets/user_profile/component/count_label.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:bluesky/bluesky.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:moyousky/services/actor_service.dart' as bsky;
+import 'package:moyousky/animation/fade_route.dart';
+import 'package:moyousky/views/user_relationship_list.dart';
 
 class UserProfileHeader extends StatelessWidget {
   final ActorProfile? profileData;
+  final bsky.ActorService blueskyApiService = bsky.ActorService();
 
-  const UserProfileHeader({Key? key, required this.profileData})
-      : super(key: key);
+  UserProfileHeader({Key? key, required this.profileData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +27,7 @@ class UserProfileHeader extends StatelessWidget {
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                 color: Colors.white,
-                image: profileData?.banner!= null
+                image: profileData?.banner != null
                     ? DecorationImage(
                         image: NetworkImage(profileData?.banner ?? ''),
                         fit: BoxFit.scaleDown,
@@ -54,17 +57,39 @@ class UserProfileHeader extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
                       CountLabel(
-                          count: profileData?.followersCount?.toString(),
-                          label: 'フォロワー',
-                          onTap: () {
-                            // TODO: フォロワーのリストを表示するロジックを追加
-                          }),
+                        count: profileData?.followersCount?.toString(),
+                        label: 'フォロワー',
+                        onTap: () async {
+                          final fetcher =
+                              await blueskyApiService.createFollowersFetcher(
+                                  profileData?.handle ?? '', 50);
+                          Navigator.of(context).push(
+                            FadeRoute(
+                              page: UserRelationshipList(
+                                fetcher: fetcher,
+                                title: 'フォロワー',
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                       CountLabel(
-                          count: profileData?.followsCount?.toString(),
-                          label: 'フォロー',
-                          onTap: () {
-                            // TODO: フォローのリストを表示するロジックを追加
-                          }),
+                        count: profileData?.followsCount?.toString(),
+                        label: 'フォロー',
+                        onTap: () async {
+                          final fetcher =
+                              await blueskyApiService.createFollowsFetcher(
+                                  profileData?.handle ?? '', 50);
+                          Navigator.of(context).push(
+                            FadeRoute(
+                              page: UserRelationshipList(
+                                fetcher: fetcher,
+                                title: 'フォロー',
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                       CountLabel(
                         count: profileData?.postsCount?.toString(),
                         label: 'ポスト数',
@@ -81,7 +106,8 @@ class UserProfileHeader extends StatelessWidget {
                       child: Linkify(
                         onOpen: (link) async {
                           try {
-                            await launchUrl(Uri.parse(link.url), mode: LaunchMode.externalApplication);
+                            await launchUrl(Uri.parse(link.url),
+                                mode: LaunchMode.externalApplication);
                           } catch (e) {
                             print('Could not launch ${link.url}. Error: $e');
                           }

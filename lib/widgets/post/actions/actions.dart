@@ -1,47 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:bluesky/bluesky.dart' as bsky;
-import 'package:moyousky/services/bluesky_api_service.dart';
+import 'package:moyousky/services/post_service.dart';
 
-Future<void> handleRepostAction(
-    bsky.Post post,
-    bool isReposted,
-    BlueskyApiService apiService,
-    Function(bool, int) updateState) async {
+Future<void> handleRepostAction(bsky.Post post, bool isReposted,
+    PostService apiService, Function(bool, int) updateState) async {
+  updateState(!isReposted, isReposted ? -1 : 1);
 
   String cid = post.cid;
   String uri = post.uri.toString();
-  if (isReposted) {
-    await apiService.deletePost(uri);
-    updateState(false, -1);
-  } else {
-    await apiService.repost(cid, uri);
-    updateState(true, 1);
+
+  try {
+    if (isReposted) {
+      await apiService.deletePost(uri);
+    } else {
+      await apiService.repost(cid, uri);
+    }
+  } catch (e) {
+    updateState(isReposted, isReposted ? 1 : -1);
   }
 }
 
-Future<void> handleFavoriteAction(
-    bsky.Post post,
-    bool isLiked,
-    BlueskyApiService apiService,
-    Function(bool, int) updateState) async {
+Future<void> handleFavoriteAction(bsky.Post post, bool isLiked,
+    PostService apiService, Function(bool, int) updateState) async {
+  updateState(!isLiked, isLiked ? -1 : 1);
 
   String cid = post.cid;
   bsky.AtUri uri = post.uri;
 
-  if (isLiked) {
-    await apiService.deletePost(uri.toString());
-    updateState(false, -1);
-  } else {
-    await apiService.likePost(cid, uri.toString());
-    updateState(true, 1);
+  try {
+    if (isLiked) {
+      await apiService.deletePost(uri.toString());
+    } else {
+      await apiService.likePost(cid, uri.toString());
+    }
+  } catch (e) {
+    updateState(isLiked, isLiked ? 1 : -1);
   }
 }
 
 Future<void> handleDeleteAction(
-    BuildContext context,
-    String uri,
-    BlueskyApiService apiService,
-    ) async {
+  BuildContext context,
+  String uri,
+    PostService apiService,
+) async {
   Navigator.of(context).pop();
   final bool confirmed = await showDialog(
     context: context,
