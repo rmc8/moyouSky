@@ -37,7 +37,7 @@ class UserProfileHeader extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 114.0),
+            padding: const EdgeInsets.only(top: 80.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[

@@ -7,6 +7,9 @@ import 'package:moyousky/widgets/navigation/bottom_navi.dart';
 import 'package:moyousky/views/search.dart';
 import 'package:moyousky/views/timeline.dart';
 import 'package:moyousky/widgets/user_profile/profile_section.dart' as ps;
+import 'package:moyousky/widgets/user_profile/feeds.dart';
+import 'package:moyousky/services/author_feed_fetcher_service.dart';
+import 'package:moyousky/utils/constants.dart' as cons;
 
 class UserProfile extends StatefulWidget {
   final String did;
@@ -44,7 +47,8 @@ class UserProfileState extends State<UserProfile>
 
   Future<ImageInfo> _getImageInfo(String? url) async {
     final Completer<ImageInfo> completer = Completer();
-    final ImageStream stream = NetworkImage(url!).resolve(const ImageConfiguration());
+    final ImageStream stream =
+        NetworkImage(url!).resolve(const ImageConfiguration());
     final listener = ImageStreamListener((ImageInfo info, bool _) {
       completer.complete(info);
     });
@@ -56,71 +60,102 @@ class UserProfileState extends State<UserProfile>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            expandedHeight: 456.0,
-            floating: false,
-            pinned: true,
-            flexibleSpace: ps.UserProfileHeader(profileData: profileData),
-            leading: InkWell(
-              onTap: () => Navigator.of(context).pop(), // 戻るボタンの動作
-              child: Container(
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xAA0000000),
-                ),
-                margin: const EdgeInsets.all(14.5),
-                child: const Center(
-                  child: Icon(Icons.arrow_back, color: Colors.white),
-                ),
-              ),
+      appBar: AppBar(
+        elevation: 0,
+        toolbarHeight: 40.0,
+        title: Text(
+          profileData?.displayName ?? profileData?.handle ?? 'プロフィール',
+          style: const TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+            fontSize: 22.0,
+          ),
+        ),
+        leading: InkWell(
+          onTap: () => Navigator.of(context).pop(),
+          child: Container(
+            margin: const EdgeInsets.all(6.0),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xAA0000000),
             ),
-            backgroundColor: Colors.white,
-            actions: [
-              InkWell(
-                onTap: () {}, // TODO: メニューを開く動作
-                child: Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xAA0000000),
-                  ),
-                  margin: const EdgeInsets.all(8.0),
-                  child: const Center(
-                    child: Icon(Icons.more_vert, color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-            bottom: PreferredSize(
-              preferredSize: Size.fromHeight(48.0),
-              child: Container(
-                color: Colors.white,  // 背景色を設定
-                child: TabBar(
-                  controller: _tabController,
-                  labelColor: Colors.black,
-                  tabs: const <Widget>[
-                    Tab(text: '投稿'),
-                    Tab(text: '返信'),
-                    Tab(text: '画像'),
-                    Tab(text: 'いいね'),
-                  ],
-                ),
-              ),
+            child: const Center(
+              child: Icon(Icons.arrow_back, color: Colors.white),
             ),
           ),
-          SliverFillRemaining(
-            child: TabBarView(
-              controller: _tabController,
-              children: const <Widget>[ // ここにそれぞれのタブに対応するタイムラインを実装したいです。
-                Center(child: Text('投稿の内容')),
-                Center(child: Text('返信の内容')),
-                Center(child: Text('画像の内容')),
-                Center(child: Text('いいねの内容')),
-              ],
+        ),
+        backgroundColor: Colors.white,
+        actions: [
+          InkWell(
+            onTap: () {}, // TODO: メニューを開く動作
+            child: Container(
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xAA0000000),
+              ),
+              margin: const EdgeInsets.all(8.0),
+              child: const Center(
+                child: Icon(Icons.more_vert, color: Colors.white),
+              ),
             ),
           ),
         ],
+      ),
+      body: NotificationListener<ScrollUpdateNotification>(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 440,
+              floating: false,
+              pinned: true,
+              toolbarHeight: 52.5,
+              flexibleSpace: ps.UserProfileHeader(profileData: profileData),
+              leading: Icon(Icons.arrow_back, color: Colors.transparent),
+              backgroundColor: Colors.white,
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(0.0),
+                child: Material(
+                  color: Colors.white,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 4.5), // この行を追加
+                    child: TabBar(
+                      controller: _tabController,
+                      labelColor: Colors.black,
+                      tabs: const <Widget>[
+                        Tab(text: '投稿'),
+                        Tab(text: '返信'),
+                        Tab(text: '画像'),
+                        Tab(text: 'いいね'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height,
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: <Widget>[
+                        AuthorFeedView(
+                            feedFetcher: PostFetcher(actor: widget.did)),
+                        AuthorFeedView(
+                            feedFetcher: ReplyFetcher(actor: widget.did)),
+                        AuthorFeedView(
+                            feedFetcher: MediaPostFetcher(actor: widget.did)),
+                        AuthorFeedView(
+                            feedFetcher: LikeFetcher(actor: widget.did)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: BskyBottomNavigationBar(
         onTap: (index) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -11,6 +12,7 @@ import 'package:moyousky/themes/statusBar.dart';
 import 'package:moyousky/repository/shared_preferences_repository.dart';
 
 void main() async {
+  // debugPaintSizeEnabled = true;
   timeago.setLocaleMessages("ja", timeago.JaMessages());
   WidgetsFlutterBinding.ensureInitialized();
   final isLoggedIn = await SharedPreferencesRepository().isLoggedIn();

@@ -45,15 +45,15 @@ class ProfileSection extends StatelessWidget {
             children: [
               Column(
                 children: [
-                  const Text('フォロワー', style: TextStyle(color: Colors.grey)),
                   Text(followers.toString()),
+                  const Text('フォロワー', style: TextStyle(color: Colors.grey, fontSize: 10.5)),
                 ],
               ),
               const SizedBox(width: 16.0),
               Column(
                 children: [
-                  const Text('フォロー', style: TextStyle(color: Colors.grey)),
                   Text(following.toString()),
+                  const Text('フォロー', style: TextStyle(color: Colors.grey, fontSize: 10.5)),
                 ],
               ),
             ],
