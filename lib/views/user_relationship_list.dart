@@ -73,46 +73,54 @@ class UserRelationshipListState extends State<UserRelationshipList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Center(
-            child: Text(
-              widget.title,
-              style: const TextStyle(
-                  color: Colors.black87, fontWeight: FontWeight.bold),
-            )),
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        actions: <Widget>[
-          IconButton(
-              icon: const Icon(
-                Icons.settings,
-                color: Colors.white,
-              ),
-              onPressed: () {}),
-        ],
+      appBar: _appBar(),
+      body: _body(),
+    );
+  }
+
+  AppBar _appBar() {
+    return AppBar(
+      title: Center(
+          child: Text(
+        widget.title,
+        style:
+            const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+      )),
+      backgroundColor: Colors.white,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.black87),
+        onPressed: () => Navigator.of(context).pop(),
       ),
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (scrollNotification) {
-          if (scrollNotification is ScrollEndNotification &&
-              scrollNotification.metrics.pixels ==
-                  scrollNotification.metrics.maxScrollExtent) {
-            _fetchPastActors();
+      actions: <Widget>[
+        IconButton(
+            icon: const Icon(
+              Icons.settings,
+              color: Colors.white,
+            ),
+            onPressed: () {}),
+      ],
+    );
+  }
+
+  NotificationListener _body() {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollNotification) {
+        if (scrollNotification is ScrollEndNotification &&
+            scrollNotification.metrics.pixels ==
+                scrollNotification.metrics.maxScrollExtent) {
+          _fetchPastActors();
+        }
+        return true;
+      },
+      child: ListView.builder(
+        itemCount: actorList.length + (isLoading ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == actorList.length) {
+            return const Center(child: CircularProgressIndicator());
           }
-          return true;
+          final actor = actorList[index];
+          return ActorCard(actor: actor);
         },
-        child: ListView.builder(
-          itemCount: actorList.length + (isLoading ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (index == actorList.length) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            final actor = actorList[index];
-            return ActorCard(actor: actor);
-          },
-        ),
       ),
     );
   }

@@ -1,18 +1,21 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:moyousky/widgets/post/post.dart';
-import 'package:moyousky/services/timeline_service.dart';
-import 'package:moyousky/utils/post_utils.dart';
-import 'package:moyousky/widgets/drawer/main_drawer.dart';
-import 'package:moyousky/widgets/common/headerLogo.dart' as hl;
+
 import 'package:moyousky/views/search.dart';
-import 'package:moyousky/animation/fade_route.dart';
-import 'package:moyousky/widgets/drawer_button/main_drawer_btn.dart';
-import 'package:moyousky/widgets/navigation/bottom_navi.dart';
-import 'package:moyousky/notifiers/timeline_notifier.dart';
-import 'package:moyousky/repository/shared_preferences_repository.dart';
 import 'package:moyousky/utils/post_utils.dart';
+import 'package:moyousky/widgets/post/post.dart';
+import 'package:moyousky/utils/fade_route.dart';
+import 'package:moyousky/services/timeline_service.dart';
+import 'package:moyousky/widgets/drawer/main_drawer.dart';
+import 'package:moyousky/notifiers/timeline_notifier.dart';
+import 'package:moyousky/widgets/navigation/bottom_navi.dart';
+import 'package:moyousky/widgets/common/headerLogo.dart' as hl;
+import 'package:moyousky/widgets/drawer_button/main_drawer_btn.dart';
+import 'package:moyousky/repository/shared_preferences_repository.dart';
+
 
 final blueskyApiServiceProvider = Provider<TimelineService>((ref) {
   return TimelineService();
@@ -179,86 +182,95 @@ class TimelineState extends ConsumerState<Timeline>
     super.build(context);
     final did = prefs.getDiD();
     return Scaffold(
-      appBar: AppBar(
-        leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: UserAvatar(),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          },
-        ),
-        title: hl.HeaderLogo(),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        actions: <Widget>[
-          IconButton(
-              icon: const Icon(
-                Icons.settings,
-                color: Colors.black54,
-              ),
-              onPressed: () {}),
-        ],
-      ),
+      appBar: _appBar(),
       drawer: const MainDrawer(),
-      body: Stack(
-        children: [
-          ListView.builder(
-            controller: _scrollController,
-            itemCount: posts.length,
-            itemBuilder: (context, index) => posts[index],
-            addAutomaticKeepAlives: true,
-          ),
-          if (isLoading)
-            const Center(
-              child: SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
-                  backgroundColor: Colors.black87,
-                ),
-              ),
-            ),
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: FloatingActionButton(
-              onPressed: () {
-                // change post view
-              },
-              child: const Icon(Icons.add),
-            ),
-          ),
-          if (showToTopButton)
-            Positioned(
-              bottom: 24,
-              left: 16,
-              width: 40,
-              height: 40,
-              child: FloatingActionButton(
-                mini: true,
-                onPressed: () {
-                  _scrollController.animateTo(0,
-                      duration: const Duration(seconds: 1),
-                      curve: Curves.easeInOut);
-                },
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black87,
-                child: const Icon(Icons.keyboard_arrow_up_rounded),
-              ),
-            ),
-        ],
-      ),
+      body:_body(),
       bottomNavigationBar: BskyBottomNavigationBar(
         onTap: (index) {
           if (index == 1) {
             Navigator.of(context).push(FadeRoute(page: SearchScreen()));
           }
-          // 他のindexの処理を追加することができます
         },
       ),
     );
   }
+
+  AppBar _appBar(){
+    return AppBar(
+      leading: Builder(
+        builder: (context) {
+          return IconButton(
+            icon: UserAvatar(),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          );
+        },
+      ),
+      title: hl.HeaderLogo(),
+      centerTitle: true,
+      backgroundColor: Colors.white,
+      actions: <Widget>[
+        IconButton(
+            icon: const Icon(
+              Icons.settings,
+              color: Colors.black54,
+            ),
+            onPressed: () {}),
+      ],
+    );
+  }
+
+  Stack _body() {
+    return Stack(
+      children: [
+        ListView.builder(
+          controller: _scrollController,
+          itemCount: posts.length,
+          itemBuilder: (context, index) => posts[index],
+          addAutomaticKeepAlives: true,
+        ),
+        if (isLoading)
+          const Center(
+            child: SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                backgroundColor: Colors.black87,
+              ),
+            ),
+          ),
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: FloatingActionButton(
+            onPressed: () {
+              // change post view
+            },
+            child: const Icon(Icons.add),
+          ),
+        ),
+        if (showToTopButton)
+          Positioned(
+            bottom: 24,
+            left: 16,
+            width: 40,
+            height: 40,
+            child: FloatingActionButton(
+              mini: true,
+              onPressed: () {
+                _scrollController.animateTo(0,
+                    duration: const Duration(seconds: 1),
+                    curve: Curves.easeInOut);
+              },
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black87,
+              child: const Icon(Icons.keyboard_arrow_up_rounded),
+            ),
+          ),
+      ],
+    );
+  }
 }
+
+

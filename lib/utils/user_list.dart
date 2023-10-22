@@ -8,7 +8,7 @@ class Actor {
   factory Actor.fromMap(Map<String, dynamic> map) {
     return Actor(
       avatarUrl: map['avatar'] ?? '',
-      handle: map['handle'] ?? '{Null}',
+      handle: map['handle'],
       displayName: map['displayName'] ?? map['handle'] ?? '{Null}',
     );
   }

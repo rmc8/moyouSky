@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:moyousky/animation/fade_route.dart';
-import 'package:moyousky/views/timeline.dart';
 
 class BskyBottomNavigationBar extends StatelessWidget {
   final Function(int) onTap;
@@ -11,31 +9,35 @@ class BskyBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       backgroundColor: Colors.white,
-      selectedItemColor: Colors.black54, // The named parameter 'selectedItemColor' isn't defined. (Documentation)  Try correcting the name to an existing named parameter's name, or defining a named parameter with the name 'selectedItemColor'.
+      selectedItemColor: Colors.black54,
       unselectedItemColor: Colors.black54,
       selectedFontSize: 10.5,
       unselectedFontSize: 10.5,
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(
-            Icons.home_filled,
-            color: Colors.black54,
-          ),
-          label: "Home",
-          backgroundColor: Colors.white,
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.search_rounded, color: Colors.black54),
-          label: "Search",
-          backgroundColor: Colors.white,
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.notifications, color: Colors.black54),
-          label: "Notification",
-          backgroundColor: Colors.white,
-        ),
-      ],
+      items: _items(),
       onTap: onTap,
     );
+  }
+
+  List<BottomNavigationBarItem> _items() {
+    return <BottomNavigationBarItem>[
+      const BottomNavigationBarItem(
+        icon: Icon(
+          Icons.home_filled,
+          color: Colors.black54,
+        ),
+        label: "Home",
+        backgroundColor: Colors.white,
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.search_rounded, color: Colors.black54),
+        label: "Search",
+        backgroundColor: Colors.white,
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.notifications, color: Colors.black54),
+        label: "Notification",
+        backgroundColor: Colors.white,
+      ),
+    ];
   }
 }

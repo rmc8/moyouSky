@@ -46,6 +46,7 @@ class RecordEmbed extends StatelessWidget {
     final handle = record['author']['handle'];
     final displayName = record['author']['displayName'];
     final avatar = record['author']['avatar'];
+    final did = record['author']['did'];
     final postValue = getFormattedPostValue(record['value']['text']);
     final embeds = record?['embeds'];
     final thumbUrl = getThumbUrlFromEmbeds(embeds);
@@ -53,6 +54,7 @@ class RecordEmbed extends StatelessWidget {
       displayName: displayName ?? handle,
       handle: handle,
       avatar: avatar,
+      did: did,
     );
 
     return InkWell(

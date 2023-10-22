@@ -5,7 +5,7 @@ import 'package:moyousky/services/report_service.dart';
 import 'package:moyousky/widgets/post/actions/actions.dart';
 import 'package:moyousky/widgets/post/post_component/post_widgets.dart';
 import 'package:moyousky/repository/shared_preferences_repository.dart' as spr;
-import 'package:moyousky/animation/fade_route.dart';
+import 'package:moyousky/utils/fade_route.dart';
 import 'package:moyousky/views/user_profile.dart';
 import 'package:bluesky/bluesky.dart' as bsky;
 import 'package:moyousky/widgets/post/embed/manager.dart';
@@ -71,6 +71,7 @@ class PostState extends State<Post> {
       displayName: author.displayName ?? author.handle,
       handle: author.handle,
       avatar: author.avatar,
+      did: author.did,
     );
 
     return Container(

@@ -45,6 +45,7 @@ class RecordWithMediaEmbed extends StatelessWidget {
     final handle = record['author']['handle'];
     final displayName = record['author']['displayName'];
     final avatar = record['author']['avatar'];
+    final did = record['author']['did'];
     final postValue = getFormattedPostValue(record['value']['text']);
     final embeds = record?['embeds'];
     final thumbUrl = getThumbUrlFromEmbeds(embeds);
@@ -52,6 +53,7 @@ class RecordWithMediaEmbed extends StatelessWidget {
       displayName: displayName ?? handle,
       handle: handle,
       avatar: avatar,
+      did: did,
     );
     final media = data.media.data as bsky.EmbedViewExternal;
     final externalEmbedWidget = ExternalEmbed(data: media);

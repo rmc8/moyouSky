@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'package:moyousky/animation/fade_route.dart';
+import 'package:moyousky/utils/fade_route.dart';
 import 'package:url_launcher/url_launcher.dart' as ul;
 import 'package:moyousky/views/search.dart';
 

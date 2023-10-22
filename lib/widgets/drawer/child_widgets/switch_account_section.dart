@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:moyousky/views/switch_account.dart' as sa;
-import 'package:moyousky/animation/fade_route.dart';
+import 'package:moyousky/utils/fade_route.dart';
 
 class SwitchAccountList extends StatelessWidget {
   const SwitchAccountList({super.key});

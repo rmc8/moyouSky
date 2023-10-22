@@ -1,23 +1,24 @@
-import 'dart:convert';
 import 'dart:math';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:moyousky/widgets/post/facets/richtext.dart';
+
 import 'package:moyousky/utils/constants.dart' as c;
+import 'package:moyousky/widgets/post/facets/richtext.dart';
 
 class FacetsProcessing extends StatelessWidget {
   final Map<String, dynamic> postData;
   final double? fontSize;
 
-  const FacetsProcessing({Key? key, required this.postData, this.fontSize}) : super(key: key);
+  const FacetsProcessing({Key? key, required this.postData, this.fontSize})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    List<TextSpan> textSpans = _buildTextSpans(context);
-
     return RichText(
       text: TextSpan(
         style: DefaultTextStyle.of(context).style,
-        children: textSpans,
+        children: _buildTextSpans(context),
       ),
     );
   }
@@ -25,65 +26,60 @@ class FacetsProcessing extends StatelessWidget {
   List<TextSpan> _buildTextSpans(BuildContext context) {
     final text = postData['post']['record']['text'];
     final facets = postData['post']['record']['facets'];
-    double currentFontSize = fontSize ?? c.FONT_SIZE;
+    final currentFontSize = fontSize ?? c.FONT_SIZE;
+
+    if (facets == null || facets.isEmpty) {
+      return [_createTextSpan(text, currentFontSize)];
+    }
 
     List<TextSpan> spans = [];
     final facetBytes = utf8.encode(text);
     var lastFacetEndByte = 0;
 
-    if (facets == null || facets.isEmpty) {
-      spans.add(
-          TextSpan(text: text, style:  TextStyle(fontSize: currentFontSize)));
-      return spans;
-    }
+    for (final facet in facets) {
+      for (final feature in facet['features']) {
+        final byteStart = facet['index']['byteStart'];
+        final byteEnd = min<int>(facet['index']['byteEnd'], facetBytes.length);
 
-    try {
-      for (final facet in facets) {
-        for (final feature in facet['features']) {
-          final byteStart = facet['index']['byteStart'];
-          final byteEnd = min<int>(
-              facet['index']['byteEnd'], facetBytes.length);
-          final facetText = utf8.decode(facetBytes.sublist(byteStart, byteEnd));
-
-          if (byteStart > lastFacetEndByte) {
-            spans.add(
-              TextSpan(
-                text: utf8.decode(
-                  facetBytes.sublist(lastFacetEndByte, byteStart),
-                ),
-                style: TextStyle(fontSize: currentFontSize),
-              ),
-            );
-          }
-
-          if (feature['\$type'] == 'app.bsky.richtext.facet#link') {
-            spans.add(RichTextHelper.linkTextSpan(
-                text: facetText,
-                uri: feature['uri'],
-                fontSize: currentFontSize));
-          } else if (feature['\$type'] == 'app.bsky.richtext.facet#tag') {
-            spans.add(RichTextHelper.hashtagTextSpan(
-                text: facetText, fontSize: currentFontSize, context: context));
-          }
-
-          lastFacetEndByte = byteEnd;
+        if (byteStart > lastFacetEndByte) {
+          spans.add(_createTextSpan(
+            utf8.decode(facetBytes.sublist(lastFacetEndByte, byteStart)),
+            currentFontSize,
+          ));
         }
+
+        spans.add(_processFeature(
+            feature,
+            utf8.decode(facetBytes.sublist(byteStart, byteEnd)),
+            currentFontSize,
+            context));
+        lastFacetEndByte = byteEnd;
       }
-    } catch (e) {
-      spans.add(
-          TextSpan(text: text, style:  TextStyle(fontSize: currentFontSize)));
-      return spans;
     }
+
     if (lastFacetEndByte < facetBytes.length) {
-      spans.add(
-        TextSpan(
-          text: utf8
-              .decode(facetBytes.sublist(lastFacetEndByte, facetBytes.length)),
-          style:  TextStyle(fontSize: currentFontSize),
-        ),
-      );
+      spans.add(_createTextSpan(
+          utf8.decode(facetBytes.sublist(lastFacetEndByte)), currentFontSize));
     }
 
     return spans;
+  }
+
+  TextSpan _createTextSpan(String text, double fontSize) {
+    return TextSpan(text: text, style: TextStyle(fontSize: fontSize));
+  }
+
+  TextSpan _processFeature(Map<String, dynamic> feature, String facetText,
+      double fontSize, BuildContext context) {
+    switch (feature['\$type']) {
+      case 'app.bsky.richtext.facet#link':
+        return RichTextHelper.linkTextSpan(
+            text: facetText, uri: feature['uri'], fontSize: fontSize);
+      case 'app.bsky.richtext.facet#tag':
+        return RichTextHelper.hashtagTextSpan(
+            text: facetText, fontSize: fontSize, context: context);
+      default:
+        return _createTextSpan(facetText, fontSize);
+    }
   }
 }

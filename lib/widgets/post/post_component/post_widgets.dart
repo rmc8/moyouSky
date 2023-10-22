@@ -1,48 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:moyousky/services/post_service.dart';
 import 'package:share/share.dart';
+import 'package:bluesky/bluesky.dart' as bsky;
 import 'package:moyousky/views/report.dart';
-import 'package:moyousky/widgets/post/actions/actions.dart';
+import 'package:moyousky/utils/fade_route.dart';
 import 'package:moyousky/services/post_service.dart';
 import 'package:moyousky/services/report_service.dart';
-import 'package:moyousky/animation/fade_route.dart';
-import 'package:bluesky/bluesky.dart' as bsky;
+import 'package:moyousky/widgets/post/actions/actions.dart';
 
 void showBottomSheetCustom(
     BuildContext context,
     bsky.FeedView feedView,
     PostService postApiService,
     ReportService reportApiService,
-    bool myOwnPost) {
+    bool myOwnPost,
+    ) {
+  // ignore: no_leading_underscores_for_local_identifiers
+  ListTile _buildListTile({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: onTap,
+    );
+  }
+
   showModalBottomSheet(
     context: context,
     builder: (context) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Container(
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10.0),
-                topRight: Radius.circular(10.0),
-              ),
-            ),
-            child: ListTile(
-              leading: const Icon(Icons.share),
-              title: const Text('共有'),
-              onTap: () {
-                final postUri = feedView.post.uri.toString();
-                Share.share(postUri);
-              },
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.content_copy),
-            title: const Text('ポストをコピー'),
+          _buildListTile(
+            icon: Icons.share,
+            title: '共有',
             onTap: () {
-              final postContent = feedView.post.record.text.toString();
-              Clipboard.setData(ClipboardData(text: postContent));
+              Share.share(feedView.post.uri.toString());
+            },
+          ),
+          _buildListTile(
+            icon: Icons.content_copy,
+            title: 'ポストをコピー',
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: feedView.post.record.text.toString()));
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -51,32 +54,29 @@ void showBottomSheetCustom(
               );
             },
           ),
-          if (myOwnPost) ...[
-            ListTile(
-              leading: const Icon(Icons.delete),
-              title: const Text('ポストを削除'),
+          if (myOwnPost)
+            _buildListTile(
+              icon: Icons.delete,
+              title: 'ポストを削除',
               onTap: () {
-                handleDeleteAction(
-                    context, feedView.post.uri.toString(), postApiService);
+                handleDeleteAction(context, feedView.post.uri.toString(), postApiService);
               },
             ),
-          ],
-          if (!myOwnPost) ...[
-            ListTile(
-              leading: const Icon(Icons.report),
-              title: const Text('ポストを報告'),
+          if (!myOwnPost)
+            _buildListTile(
+              icon: Icons.report,
+              title: 'ポストを報告',
               onTap: () async {
                 Navigator.of(context).push(
                   FadeRoute(
                     page: ReportScreen(
-                      postDid: feedView.post.author.did ?? '',
+                      postDid: feedView.post.author.did,
                       apiService: reportApiService,
                     ),
                   ),
                 );
               },
             ),
-          ],
         ],
       );
     },
@@ -84,24 +84,23 @@ void showBottomSheetCustom(
 }
 
 Widget iconTextWidget(
-  IconData icon,
-  int count,
-  Function onTap, {
-  Color? color,
-}) {
+    IconData icon,
+    int count,
+    Function onTap, {
+      Color? color,
+    }) {
   return GestureDetector(
     onTap: () => onTap(),
     child: Row(
       children: [
-        Icon(
-          icon,
-          color: color ?? Colors.black45,
-        ),
+        Icon(icon, color: color ?? Colors.black45),
         const SizedBox(width: 4.0),
         Text(
           '$count',
           style: TextStyle(
-              color: color ?? Colors.black45, fontWeight: FontWeight.bold),
+            color: color ?? Colors.black45,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     ),

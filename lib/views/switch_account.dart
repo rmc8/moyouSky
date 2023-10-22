@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:moyousky/utils/database_helper.dart' as dh;
-import 'package:moyousky/views/login.dart' as li;
-import 'package:moyousky/repository/shared_preferences_repository.dart';
 import 'package:moyousky/views/timeline.dart';
+import 'package:moyousky/views/login.dart' as li;
+import 'package:moyousky/utils/fade_route.dart';
+import 'package:moyousky/utils/database_helper.dart' as dh;
 import 'package:moyousky/widgets/common/headerLogo.dart' as hl;
-import 'package:moyousky/animation/fade_route.dart';
+import 'package:moyousky/repository/shared_preferences_repository.dart';
 
 class SwitchAccountScreen extends StatefulWidget {
   const SwitchAccountScreen({super.key});
@@ -30,6 +30,81 @@ class SwitchAccountScreenState extends State<SwitchAccountScreen> {
     });
   }
 
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: hl.HeaderLogo(),
+      centerTitle: true,
+      backgroundColor: Colors.white,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.black54),
+        onPressed: () {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          }
+        },
+      ),
+      actions: <Widget>[
+        IconButton(
+            icon: const Icon(
+              Icons.settings,
+              color: Colors.white,
+            ),
+            onPressed: () {}),
+      ],
+    );
+  }
+
+  Widget _buildBody() {
+    return ListView(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.add_circle_outline),
+          title: const Text('アカウントを追加する'),
+          onTap: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => li.LoginScreen()),
+            );
+          },
+        ),
+        ..._accounts!.map((account) {
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(account['avatar_url'] ?? ''),
+            ),
+            title: Text(account['display_name'] ?? '{Null}'),
+            subtitle: Text(account['handle'] ?? '{Null}'),
+            trailing: PopupMenuButton<int>(
+              icon: const Icon(Icons.more_vert),
+              onSelected: (value) {
+                if (value == 1) {
+                  _deleteAccount(account['id']);
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 1,
+                  child: Text('ログアウト'),
+                ),
+              ],
+            ),
+            onTap: () async {
+              await _sharedPreferencesRepo.setId(account['handle']);
+              await _sharedPreferencesRepo.setService(account['service']);
+              await _sharedPreferencesRepo.setDid(account['did']);
+              Navigator.of(context).push(FadeRoute(page: Timeline()));
+            },
+          );
+        }).toList(),
+      ],
+    );
+  }
+
+  Future<void> _deleteAccount(String accountId) async {
+    await dh.DatabaseHelper.instance.deleteLoginInfo(accountId);
+    _loadAccounts();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_accounts == null) {
@@ -37,75 +112,8 @@ class SwitchAccountScreenState extends State<SwitchAccountScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: hl.HeaderLogo(),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black54),
-          onPressed: () {
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            }
-          },
-        ),
-        actions: <Widget>[
-          IconButton(
-              icon: const Icon(
-                Icons.settings,
-                color: Colors.white,
-              ),
-              onPressed: () {}),
-        ],
-      ),
-      body: ListView(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.add_circle_outline),
-            title: const Text('アカウントを追加する'),
-            onTap: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => li.LoginScreen()),
-              );
-            },
-          ),
-          ..._accounts!.map((account) {
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(account['avatar_url'] ?? ''),
-              ),
-              title: Text(account['display_name'] ?? '{Null}'),
-              subtitle: Text(account['handle'] ?? '{Null}'),
-              trailing: PopupMenuButton<int>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (value) {
-                  if (value == 1) {
-                    _deleteAccount(account['id']);
-                  }
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 1,
-                    child: Text('ログアウト'),
-                  ),
-                ],
-              ),
-              onTap: () async {
-                await _sharedPreferencesRepo.setId(account['handle']);
-                await _sharedPreferencesRepo.setService(account['service']);
-                await _sharedPreferencesRepo.setDid(account['did']);
-                Navigator.of(context).push(FadeRoute(page: Timeline()));
-              },
-            );
-          }).toList(),
-        ],
-      ),
+      appBar: _buildAppBar(),
+      body: _buildBody(),
     );
-  }
-
-  Future<void> _deleteAccount(String accountId) async {
-    await dh.DatabaseHelper.instance.deleteLoginInfo(accountId);
-    _loadAccounts();
   }
 }

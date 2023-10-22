@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:moyousky/widgets/user_profile/component/avatar_builder.dart';
-import 'package:moyousky/widgets/user_profile/component/count_label.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
+
 import 'package:bluesky/bluesky.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+
+import 'package:moyousky/utils/fade_route.dart';
 import 'package:moyousky/services/actor_service.dart' as bsky;
-import 'package:moyousky/animation/fade_route.dart';
 import 'package:moyousky/views/user_relationship_list.dart';
+import 'package:moyousky/widgets/user_profile/component/count_label.dart';
+import 'package:moyousky/widgets/user_profile/component/avatar_builder.dart';
 
 class UserProfileHeader extends StatelessWidget {
   final ActorProfile? profileData;

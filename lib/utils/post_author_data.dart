@@ -2,8 +2,9 @@ class AuthorData {
   final String displayName;
   final String handle;
   final String? avatar;
+  final String did;
 
-  AuthorData({required this.displayName, required this.handle, required this.avatar});
+  AuthorData({required this.displayName, required this.handle, required this.avatar, required this.did});
 
   @override
   String toString() {
@@ -17,7 +18,8 @@ class AuthorData {
     return other is AuthorData &&
         other.displayName == displayName &&
         other.handle == handle &&
-        other.avatar == avatar;
+        other.avatar == avatar &&
+        other.did == did;
   }
 
   @override

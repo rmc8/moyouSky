@@ -1,8 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:moyousky/utils/post_utils.dart';
-import 'package:moyousky/services/timeline_service.dart';
-import 'package:moyousky/widgets/post/post.dart' as pw;
 import 'package:bluesky/bluesky.dart' as bsky;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:moyousky/utils/post_utils.dart';
+import 'package:moyousky/widgets/post/post.dart' as pw;
+import 'package:moyousky/services/timeline_service.dart';
 
 class PostWithTimestamp {
   final pw.Post post;
@@ -31,7 +32,7 @@ class TimelineNotifier extends StateNotifier<Map<String, List<PostWithTimestamp>
     }
 
     final feedViews = await apiService.getTimeline(limit: 32);
-    savePostsData(did, feedViews.feeds);  // 保存するデータをキャッシュに追加
+    savePostsData(did, feedViews.feeds);
 
     final fetchedPosts = getPostWidgets(feedViews.feeds)
         .map((post) => PostWithTimestamp(post: post, timestamp: DateTime.now()))
