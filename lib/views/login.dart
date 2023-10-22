@@ -29,7 +29,7 @@ class LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: hl.HeaderLogo(title: 'Login'),
+        title: hl.HeaderLogo(title: 'ログイン'),
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black54),

@@ -10,6 +10,7 @@ class BskyBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      backgroundColor: Colors.white,
       selectedItemColor: Colors.black54, // The named parameter 'selectedItemColor' isn't defined. (Documentation)  Try correcting the name to an existing named parameter's name, or defining a named parameter with the name 'selectedItemColor'.
       unselectedItemColor: Colors.black54,
       selectedFontSize: 10.5,
