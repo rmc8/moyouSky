@@ -13,9 +13,7 @@ class RecordEmbed extends StatelessWidget {
     const int maxLength = 128;
     const int maxNewLines = 5;
 
-    int numNewLines = postValue
-        .split('\n')
-        .length - 1;
+    int numNewLines = postValue.split('\n').length - 1;
     if (postValue.length > maxLength || numNewLines > maxNewLines) {
       int endIndex = math.min(maxLength, postValue.length);
       String result = postValue.substring(0, endIndex);
@@ -61,11 +59,10 @@ class RecordEmbed extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) =>
-                PostDetails(
-                  uri: uri,
-                  authorData: author,
-                ),
+            builder: (context) => PostDetails(
+              uri: uri,
+              authorData: author,
+            ),
           ),
         );
       },
@@ -83,21 +80,27 @@ class RecordEmbed extends StatelessWidget {
                 CircleAvatar(
                   radius: 13.5,
                   backgroundImage:
-                  (avatar != null) ? NetworkImage(avatar) : null,
+                      (avatar != null) ? NetworkImage(avatar) : null,
                   child: (avatar == null)
                       ? const Icon(Icons.person, color: Colors.white)
                       : null,
                 ),
                 const SizedBox(width: 6.0),
-                Text(
-                  displayName,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 15.0),
+                Flexible(
+                  child: Text(
+                    displayName,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 15.0),
+                  ),
                 ),
                 const SizedBox(width: 4.0),
-                Text(
-                  handle,
-                  style: const TextStyle(color: Colors.grey, fontSize: 15.0),
+                Flexible(
+                  child: Text(
+                    handle,
+                    style: const TextStyle(color: Colors.grey, fontSize: 15.0),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),

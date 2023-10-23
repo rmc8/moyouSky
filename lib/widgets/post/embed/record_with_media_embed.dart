@@ -101,6 +101,7 @@ class RecordWithMediaEmbed extends StatelessWidget {
                     const SizedBox(width: 4.0),
                     Text(
                       handle,
+                      overflow: TextOverflow.ellipsis,
                       style:
                           const TextStyle(color: Colors.grey, fontSize: 15.0),
                     ),

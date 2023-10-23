@@ -1,6 +1,7 @@
-import 'package:moyousky/widgets/post/post.dart';
 import 'package:bluesky/bluesky.dart' as bsky;
 import 'package:timeago/timeago.dart' as timeago;
+
+import 'package:moyousky/widgets/post/post.dart';
 
 List<Post> getPostWidgets(List<bsky.FeedView> feedViews) {
   return feedViews.map((feedView) {

@@ -14,7 +14,9 @@ class AuthorRowWidget extends StatelessWidget {
   AuthorRowWidget({
     required this.postThreadData,
     required this.authorData,
-  });
+  }) ;
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +36,8 @@ class AuthorRowWidget extends StatelessWidget {
             children: [
               InkWell(
                 onTap: () {
-                  Navigator.of(context).push(FadeRoute(page: UserProfile(did: authorData.did)));
+                  Navigator.of(context)
+                      .push(FadeRoute(page: UserProfile(did: authorData.did)));
                 },
                 child: CircleAvatar(
                   radius: 28.0,
@@ -52,7 +55,8 @@ class AuthorRowWidget extends StatelessWidget {
                 children: [
                   Text(
                     postAuthorName,
-                    style: const TextStyle(fontSize: 21.5),
+                    style: const TextStyle(
+                        fontSize: 20.5, fontWeight: FontWeight.bold),
                   ),
                   Text(
                     '@$postAuthorHandle',
@@ -65,16 +69,19 @@ class AuthorRowWidget extends StatelessWidget {
           const SizedBox(height: 10.0),
           Padding(
             padding: const EdgeInsets.only(left: 4.0),
-            child: FacetsProcessing(
-              postData: {
-                'post': {
-                  'record': {
-                    'text': postValue,
-                    'facets': postData.record.facets ?? [],
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: FacetsProcessing(
+                postData: {
+                  'post': {
+                    'record': {
+                      'text': postValue,
+                      'facets': postData.record.toJson()['facets'] ?? [],
+                    },
                   },
                 },
-              },
-              fontSize: 20.0,
+                fontSize: 20.0,
+              ),
             ),
           ),
           EmbedManager(post: postData),

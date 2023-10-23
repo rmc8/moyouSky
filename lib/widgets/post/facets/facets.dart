@@ -78,6 +78,14 @@ class FacetsProcessing extends StatelessWidget {
       case 'app.bsky.richtext.facet#tag':
         return RichTextHelper.hashtagTextSpan(
             text: facetText, fontSize: fontSize, context: context);
+      case 'app.bsky.richtext.facet#mention':
+        final did = feature['did'] as String;
+        return RichTextHelper.mentionTextSpan(
+          text: facetText,
+          fontSize: fontSize,
+          did: did,
+          context: context,
+        );
       default:
         return _createTextSpan(facetText, fontSize);
     }

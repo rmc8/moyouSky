@@ -6,9 +6,11 @@ import 'package:moyousky/views/search.dart';
 import 'package:moyousky/views/timeline.dart';
 import 'package:moyousky/utils/fade_route.dart';
 import 'package:moyousky/utils/post_author_data.dart';
+import 'package:moyousky/widgets/post_detail/replies.dart';
 import 'package:moyousky/widgets/post_detail/main_post.dart';
 import 'package:moyousky/widgets/navigation/bottom_navi.dart';
 import 'package:moyousky/widgets/common/headerLogo.dart' as hl;
+import 'package:moyousky/widgets/post_detail/parent_posts.dart';
 import 'package:moyousky/services/post_thread_service.dart' as pt;
 
 class PostDetails extends StatefulWidget {
@@ -16,10 +18,9 @@ class PostDetails extends StatefulWidget {
   final AuthorData authorData;
 
   const PostDetails({
-    Key? key,
     required this.uri,
     required this.authorData,
-  }) : super(key: key);
+  });
 
   @override
   PostThreadState createState() => PostThreadState();
@@ -27,11 +28,13 @@ class PostDetails extends StatefulWidget {
 
 class PostThreadState extends State<PostDetails> {
   late Future<bsky.PostThread> _postThreadFuture;
+  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
     _postThreadFuture = pt.PostThreadService().getPostThread(widget.uri, 6);
+    _scrollController = ScrollController();
   }
 
   @override
@@ -42,6 +45,7 @@ class PostThreadState extends State<PostDetails> {
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
+
 
   AppBar _buildAppBar() {
     return AppBar(
@@ -68,17 +72,9 @@ class PostThreadState extends State<PostDetails> {
   }
 
   Widget _buildBody() {
-    return Column(
+    return Stack(
       children: [
-        Expanded(
-          child: SingleChildScrollView(
-            child: Stack(
-              children: [
-                _buildPostThreadContent(),
-              ],
-            ),
-          ),
-        ),
+        _buildPostThreadContent(),
         _buildReplyContainer(),
       ],
     );
@@ -95,16 +91,26 @@ class PostThreadState extends State<PostDetails> {
         } else if (!snapshot.hasData) {
           return const Center(child: Text('No data received.'));
         } else {
-          final postThreadData = snapshot.data;
-          return Column(
-            children: [
-              AuthorRowWidget(
-                  postThreadData: postThreadData!,
-                  authorData: widget.authorData),
-            ],
-          );
+          bsky.PostThread postThreadData = snapshot.data!;
+          return _buildContent(postThreadData);
         }
       },
+    );
+  }
+
+  Widget _buildContent(bsky.PostThread postThreadData) {
+    final record = postThreadData.thread.data as bsky.PostThreadViewRecord;
+    return ListView(
+      controller: _scrollController,
+      children: [
+        PreviousRepliesWidget(postThreadData: record),
+        AuthorRowWidget(
+          postThreadData: postThreadData,
+          authorData: widget.authorData,
+        ),
+        ChildRepliesWidget(postThreadData: record),
+        const SizedBox(height: 60.0),
+      ],
     );
   }
 
@@ -123,7 +129,7 @@ class PostThreadState extends State<PostDetails> {
         child: Container(
           height: 60,
           decoration: const BoxDecoration(
-            color: Colors.white12,
+            color: Color(0xFFFAFAFA),
             border: Border(
               top: BorderSide(
                 color: Color(0xFFEEEEEE),

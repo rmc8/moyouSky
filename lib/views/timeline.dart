@@ -244,6 +244,7 @@ class TimelineState extends ConsumerState<Timeline>
           bottom: 16,
           right: 16,
           child: FloatingActionButton(
+            heroTag: 'newPosts',
             onPressed: () {
               // change post view
             },
@@ -257,6 +258,7 @@ class TimelineState extends ConsumerState<Timeline>
             width: 40,
             height: 40,
             child: FloatingActionButton(
+              heroTag: 'createPost',
               mini: true,
               onPressed: () {
                 _scrollController.animateTo(0,
