@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:bluesky/bluesky.dart' as bsky;
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:moyousky/views/search.dart';
 import 'package:moyousky/views/timeline.dart';
@@ -28,14 +29,23 @@ class PostDetails extends StatefulWidget {
 
 class PostThreadState extends State<PostDetails> {
   late Future<bsky.PostThread> _postThreadFuture;
-  late ScrollController _scrollController;
+  bool _showAdditionalWidgets = false;
+
 
   @override
   void initState() {
     super.initState();
     _postThreadFuture = pt.PostThreadService().getPostThread(widget.uri, 6);
-    _scrollController = ScrollController();
   }
+
+  void _onAuthorRowRendered() {
+    Future.delayed(const Duration(microseconds: 100), () {
+      setState(() {
+        _showAdditionalWidgets = true;
+      });
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -98,17 +108,20 @@ class PostThreadState extends State<PostDetails> {
     );
   }
 
+
   Widget _buildContent(bsky.PostThread postThreadData) {
     final record = postThreadData.thread.data as bsky.PostThreadViewRecord;
     return ListView(
-      controller: _scrollController,
       children: [
-        PreviousRepliesWidget(postThreadData: record),
+        if (_showAdditionalWidgets)
+          PreviousRepliesWidget(postThreadData: record),
         AuthorRowWidget(
           postThreadData: postThreadData,
           authorData: widget.authorData,
+          onRendered:_onAuthorRowRendered,
         ),
-        ChildRepliesWidget(postThreadData: record),
+        if (_showAdditionalWidgets)
+          ChildRepliesWidget(postThreadData: record),
         const SizedBox(height: 60.0),
       ],
     );
@@ -144,7 +157,7 @@ class PostThreadState extends State<PostDetails> {
                 CircleAvatar(
                   radius: 22.0,
                   backgroundImage:
-                      authorAvatar != null ? NetworkImage(authorAvatar) : null,
+                  authorAvatar != null ? NetworkImage(authorAvatar) : null,
                   child: authorAvatar == null
                       ? const Icon(Icons.person, color: Colors.white)
                       : null,
@@ -153,7 +166,7 @@ class PostThreadState extends State<PostDetails> {
                 Text(
                   '$authorNameさんに返信する',
                   style:
-                      const TextStyle(fontSize: 18.0, color: Color(0xFF444444)),
+                  const TextStyle(fontSize: 18.0, color: Color(0xFF444444)),
                 ),
               ],
             ),

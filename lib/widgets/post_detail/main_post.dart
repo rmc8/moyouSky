@@ -7,16 +7,17 @@ import 'package:moyousky/widgets/post/facets/facets.dart';
 import 'package:moyousky/widgets/post/embed/manager.dart';
 import 'package:intl/intl.dart';
 
+
 class AuthorRowWidget extends StatelessWidget {
   final bsky.PostThread postThreadData;
   final AuthorData authorData;
+  final VoidCallback? onRendered;
 
   AuthorRowWidget({
     required this.postThreadData,
     required this.authorData,
-  }) ;
-
-
+    this.onRendered,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +29,12 @@ class AuthorRowWidget extends StatelessWidget {
     final postValue = postData.record.text;
     final postedDate = postData.record.createdAt;
     final reactionExists = (postData.repostCount + postData.likeCount) > 0;
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      if (onRendered != null) {
+        onRendered!();
+      }
+    });
+
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
