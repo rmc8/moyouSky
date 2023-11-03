@@ -37,11 +37,11 @@ class ImageEmbed extends StatelessWidget {
 
     bool scrollable = images.length > 1;
 
-    return Container(
+    return SizedBox(
       height: imageWidth,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        physics: scrollable ? ScrollPhysics() : NeverScrollableScrollPhysics(),
+        physics: scrollable ? const ScrollPhysics() : const NeverScrollableScrollPhysics(),
         child: Row(
           children: images
               .map((image) =>
@@ -132,7 +132,6 @@ class ImageGallery extends StatelessWidget {
         Fluttertoast.showToast(msg: "画像の取得に失敗しました");
       }
     } catch (e) {
-      print(e);
       Fluttertoast.showToast(msg: "エラーが発生しました: $e");
     }
   }
@@ -191,7 +190,7 @@ class ImageGallery extends StatelessWidget {
             },
           ),
           Positioned(
-            top: 60,
+            top: 74,
             right: 20,
             child: InkWell(
               onTap: () => Navigator.pop(context),

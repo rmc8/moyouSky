@@ -44,6 +44,16 @@ class SharedPreferencesRepository {
     _didChangeController.add(did);
   }
 
+  Future<String> getAvatar() async {
+    return (await sharedPreferences).getString('avatar') ?? '';
+  }
+
+
+  Future<void> setAvatar(String url) async {
+    (await sharedPreferences).setString('avatar', url);
+    _didChangeController.add(url);
+  }
+
   void dispose() {
     _didChangeController.close();
   }

@@ -5,17 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:moyousky/views/search.dart';
+import 'package:moyousky/views/postEditor.dart';
 import 'package:moyousky/utils/post_utils.dart';
-import 'package:moyousky/widgets/post/post.dart';
 import 'package:moyousky/utils/fade_route.dart';
+import 'package:moyousky/widgets/post/post.dart';
 import 'package:moyousky/services/timeline_service.dart';
 import 'package:moyousky/widgets/drawer/main_drawer.dart';
 import 'package:moyousky/notifiers/timeline_notifier.dart';
+import 'package:moyousky/utils/update_own_account_info.dart';
 import 'package:moyousky/widgets/navigation/bottom_navi.dart';
 import 'package:moyousky/widgets/common/headerLogo.dart' as hl;
 import 'package:moyousky/widgets/drawer_button/main_drawer_btn.dart';
 import 'package:moyousky/repository/shared_preferences_repository.dart';
-
 
 final blueskyApiServiceProvider = Provider<TimelineService>((ref) {
   return TimelineService();
@@ -62,9 +63,7 @@ class TimelineState extends ConsumerState<Timeline>
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-
     _didChangeSubscription = prefs.didChange.listen((newDid) {
-      print(newDid);
       setState(() {
         did = newDid;
         _initializeData();
@@ -74,6 +73,7 @@ class TimelineState extends ConsumerState<Timeline>
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       _initializeData();
     });
+    updateOwnAccountInfo();
   }
 
   @override
@@ -85,7 +85,8 @@ class TimelineState extends ConsumerState<Timeline>
 
   Future<void> _initializeData() async {
     did = await prefs.getDiD();
-    final postsData = ref.read(timelineNotifierProvider.notifier).getPostsData(did!);
+    final postsData =
+        ref.read(timelineNotifierProvider.notifier).getPostsData(did!);
 
     if (postsData != null) {
       final List<Post> postsFromData = getPostWidgets(postsData);
@@ -100,7 +101,6 @@ class TimelineState extends ConsumerState<Timeline>
       _fetchPosts();
     }
   }
-
 
   _scrollListener() {
     if (_scrollController.offset > 300 && !showToTopButton) {
@@ -135,13 +135,14 @@ class TimelineState extends ConsumerState<Timeline>
     final List<Post> fetchedPosts = getPostWidgets(feedViews.feeds);
 
     nextCursor = feedViews.cursor;
-    ref.read(timelineNotifierProvider.notifier).savePostsData(did!, feedViews.feeds);
+    ref
+        .read(timelineNotifierProvider.notifier)
+        .savePostsData(did!, feedViews.feeds);
 
     setState(() {
       posts = fetchedPosts;
       isLoading = false;
     });
-
   }
 
   Future<void> _fetchPastPosts() async {
@@ -149,7 +150,9 @@ class TimelineState extends ConsumerState<Timeline>
         await apiService.getTimeline(limit: 32, cursor: nextCursor);
     final List<Post> fetchedPosts = getPostWidgets(feedViews.feeds);
     nextCursor = feedViews.cursor;
-    ref.read(timelineNotifierProvider.notifier).savePostsData(did!, feedViews.feeds);
+    ref
+        .read(timelineNotifierProvider.notifier)
+        .savePostsData(did!, feedViews.feeds);
 
     setState(() {
       posts.addAll(fetchedPosts);
@@ -161,7 +164,9 @@ class TimelineState extends ConsumerState<Timeline>
     final feedViews = await apiService.getTimeline(limit: 32, cursor: cursor);
     final fetchedPosts = getPostWidgets(feedViews.feeds);
     final List<Post> newPosts = [];
-    ref.read(timelineNotifierProvider.notifier).savePostsData(did!, feedViews.feeds);
+    ref
+        .read(timelineNotifierProvider.notifier)
+        .savePostsData(did!, feedViews.feeds);
     for (var post in fetchedPosts) {
       if (!posts.contains(post)) {
         newPosts.add(post);
@@ -184,7 +189,7 @@ class TimelineState extends ConsumerState<Timeline>
     return Scaffold(
       appBar: _appBar(),
       drawer: const MainDrawer(),
-      body:_body(),
+      body: _body(),
       bottomNavigationBar: BskyBottomNavigationBar(
         onTap: (index) {
           if (index == 1) {
@@ -195,7 +200,7 @@ class TimelineState extends ConsumerState<Timeline>
     );
   }
 
-  AppBar _appBar(){
+  AppBar _appBar() {
     return AppBar(
       leading: Builder(
         builder: (context) {
@@ -246,7 +251,7 @@ class TimelineState extends ConsumerState<Timeline>
           child: FloatingActionButton(
             heroTag: 'newPosts',
             onPressed: () {
-              // change post view
+              Navigator.of(context).push(FadeRoute(page: PostEditor()));
             },
             child: const Icon(Icons.add),
           ),
@@ -274,5 +279,3 @@ class TimelineState extends ConsumerState<Timeline>
     );
   }
 }
-
-

@@ -2,8 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSCameraUsageDescription</key>
+	<string>Camera permission is required to take images to be posted on Bluesky. This allows users to take and post images only on moyouSky, without launching a separate camera application.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Microphone permission is required to take images to be posted on Bluesky. This allows users to take and post images only on moyouSky, without launching a separate camera application.</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>画像を保存するためのアクセスが必要です</string>
+    <string>Access permission is required to save images posted on Bluesky.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

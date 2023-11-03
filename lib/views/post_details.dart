@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:bluesky/bluesky.dart' as bsky;
-import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:moyousky/views/search.dart';
 import 'package:moyousky/views/timeline.dart';

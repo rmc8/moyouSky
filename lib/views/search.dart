@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:moyousky/views/timeline.dart';
-import 'package:moyousky/utils/post_utils.dart';
 import 'package:moyousky/utils/user_list.dart';
-import 'package:moyousky/widgets/post/post.dart';
+import 'package:moyousky/utils/post_utils.dart';
 import 'package:moyousky/utils/fade_route.dart';
+import 'package:moyousky/widgets/post/post.dart';
+import 'package:moyousky/views/user_profile.dart';
 import 'package:moyousky/services/search_service.dart';
 import 'package:moyousky/utils/constants.dart' as cons;
 import 'package:moyousky/widgets/drawer/main_drawer.dart';
@@ -52,7 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _onSearchChanged(String text) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
-    _debounce = Timer(const Duration(seconds: 1), () {
+    _debounce = Timer(const Duration(milliseconds: 90), () {
       _performSearch(text);
     });
   }
@@ -155,8 +156,8 @@ class _SearchScreenState extends State<SearchScreen> {
           subtitle: Text(actor.handle,
               style: const TextStyle(fontFamily: cons.DEFAULT_FONT)),
           onTap: () {
-            // ユーザープロフィールへの遷移やprintなどのロジックをここに追加
-            print('Selected user handle: ${actor.handle}');
+            Navigator.of(context).push(
+                FadeRoute(page: UserProfile(did: actor.handle)));
           },
         );
       },

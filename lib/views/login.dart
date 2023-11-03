@@ -4,9 +4,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:moyousky/views/timeline.dart';
-import 'package:moyousky/views/switch_account.dart';
-import 'package:moyousky/utils/fade_route.dart';
 import 'package:moyousky/utils/providers.dart';
+import 'package:moyousky/utils/fade_route.dart';
+import 'package:moyousky/views/switch_account.dart';
 import 'package:moyousky/widgets/common/headerLogo.dart' as hl;
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -140,7 +140,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(e.toString()),
-                    backgroundColor: Colors.red,
+                    backgroundColor: Colors.redAccent,
                   ),
                 );
               } finally {

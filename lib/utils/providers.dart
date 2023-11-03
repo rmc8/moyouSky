@@ -46,7 +46,7 @@ class LoginStateNotifier extends StateNotifier<bool> {
 
   Future<void> login(String service, String id, String password) async {
     final sharedPreferencesRepository =
-    ref.read(sharedPreferencesRepositoryProvider);
+        ref.read(sharedPreferencesRepositoryProvider);
     try {
       final res = await bsky.createSession(
         service: service,
@@ -66,12 +66,11 @@ class LoginStateNotifier extends StateNotifier<bool> {
         'follows_count': 0,
         'description': '',
       };
-      print(res.data);
       await DatabaseHelper.instance.insertLoginInfo(loginDataToInsert);
       final prf = skys.ActorService();
       await sharedPreferencesRepository.setService(service);
-      await sharedPreferencesRepository.setId(res.data.handle.toString());
-      await sharedPreferencesRepository.setDid(res.data.did.toString());
+      await sharedPreferencesRepository.setId(res.data.handle);
+      await sharedPreferencesRepository.setDid(res.data.did);
       final profileData = await prf.fetchProfileDataObj(res.data.handle);
       final Map<String, dynamic> userDataToInsert = {
         'display_name': profileData.displayName,
@@ -80,12 +79,16 @@ class LoginStateNotifier extends StateNotifier<bool> {
         'follows_count': profileData.followsCount,
         'description': profileData.description,
       };
-      await DatabaseHelper.instance.updateLoginInfoByHandleAndService(res.data.handle, service, userDataToInsert);
+      await sharedPreferencesRepository.setAvatar(profileData.avatar ?? '');
+      await DatabaseHelper.instance.updateLoginInfoByHandleAndService(
+          res.data.handle, service, userDataToInsert);
       state = true;
     } catch (e) {
       await sharedPreferencesRepository.setService('');
       await sharedPreferencesRepository.setId('');
-      throw Exception('Login failed: $e.toString()');
+      await sharedPreferencesRepository.setDid('');
+      await sharedPreferencesRepository.setAvatar('');
+      throw Exception('Login failed: ${e.toString()}');
     }
   }
 }

@@ -43,13 +43,14 @@ class SearchServiceBeta {
       }
 
       final blueskyInstance = await _sessionManager.getBlueskySession();
-      List<Map<String, dynamic>> allPosts = [];
+      List<bsky.FeedView> allPosts = [];
 
       for (int i = 0; i < uris.length; i += 5) {
         List<bsky.AtUri> limitedUris = uris.sublist(i, min(i + 5, uris.length));
         final res = await blueskyInstance.feeds.findPosts(uris: limitedUris);
-        for (var rec in res.data.toJson()['posts']) {
-          allPosts.add({'post': rec});
+        for (var rec in res.data.posts) {
+          final feedView = bsky.FeedView(post: rec);
+          allPosts.add(feedView);
         }
       }
       return {'data': allPosts};
